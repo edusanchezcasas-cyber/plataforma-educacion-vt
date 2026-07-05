@@ -1690,29 +1690,45 @@
 
   // ===== Canales disponibles según los datos reales del contacto =====
   // ===== Recordatorio dinámico para el Analista de Educación (cada 5 días desde el envío inicial) =====
+  function recordatorioEsUrgente(c){
+    if (c.estado !== 'evaluacion') return false;
+    const primera = c.rondas && c.rondas[0] ? c.rondas[0].fecha : null;
+    if (!primera || !primera.includes('/')) return false;
+    const [d,m,y] = primera.split('/');
+    const fechaEnvio = new Date(Number(y), Number(m)-1, Number(d));
+    const diffDias = Math.floor((new Date() - fechaEnvio) / (1000*60*60*24));
+    if (diffDias < 0) return false;
+    const restante = (diffDias > 0 && diffDias % 5 === 0) ? 0 : 5 - (diffDias % 5);
+    return restante <= 1;
+  }
+
   function calcularRecordatorio(c){
     if (c.estado !== 'evaluacion') return '—';
     const primera = c.rondas && c.rondas[0] ? c.rondas[0].fecha : null;
     if (!primera || !primera.includes('/')){
-      return `<span class="reminder" title="No se puede calcular con precisión: falta la fecha del primer contacto">⏱ c/5 días para el Analista de Educación (fecha de envío no registrada)</span>`;
+      return `<span class="badge" style="background:var(--amber-bg);color:var(--amber);">⏱ c/5 días · Analista Educ. (sin fecha registrada)</span>`;
     }
     const [d,m,y] = primera.split('/');
     const fechaEnvio = new Date(Number(y), Number(m)-1, Number(d));
     const hoy = new Date();
     const diffDias = Math.floor((hoy - fechaEnvio) / (1000*60*60*24));
     if (diffDias < 0){
-      return `<span class="reminder">⏱ Envío programado a futuro</span>`;
+      return `<span class="badge" style="background:var(--gray-bg);color:var(--gray);">⏱ Envío programado a futuro</span>`;
     }
     const esHoy = diffDias > 0 && diffDias % 5 === 0;
     const restante = esHoy ? 0 : 5 - (diffDias % 5);
-    return `<span class="reminder" title="Corre desde el primer envío: ${primera} (hace ${diffDias} día${diffDias===1?'':'s'})">⏱ ${esHoy ? 'Recordatorio HOY' : 'Próximo en ' + restante + ' día' + (restante===1?'':'s')} · Analista de Educación</span>`;
+    const vencido = restante <= 1; // vence hoy o mañana: urgente
+    const colorBg = esHoy || vencido ? 'var(--crimson-bg)' : 'var(--amber-bg)';
+    const colorFg = esHoy || vencido ? 'var(--crimson)' : 'var(--amber)';
+    const texto = esHoy ? '🔴 Recordatorio HOY' : (vencido ? `🔴 Mañana vence (día ${diffDias})` : `🟡 En ${restante} día${restante===1?'':'s'}`);
+    return `<span class="badge" style="background:${colorBg};color:${colorFg};" title="Corre desde el primer envío: ${primera} (hace ${diffDias} día${diffDias===1?'':'s'}) · Analista de Educación">${texto}</span>`;
   }
 
   function canalesDisponibles(c, valorActual){
     let opts = [];
-    if (c.telefono && c.telefono !== '—'){ opts.push('Llamada'); opts.push('WhatsApp'); }
-    if (c.correo && c.correo !== '—'){ opts.push('Correo'); }
-    if (opts.length === 0) opts = ['Llamada','WhatsApp','Correo'];
+    if (c.telefono && c.telefono !== '—') opts.push('Teléfono');
+    if (c.correo && c.correo !== '—') opts.push('Correo');
+    if (opts.length === 0) opts = ['Teléfono','Correo'];
     if (valorActual && !opts.includes(valorActual)) opts.push(valorActual);
     return opts;
   }
@@ -1871,7 +1887,7 @@
       const opcionesCanal = canalesDisponibles(c, ultimoCanal);
       const otrasCampanas = participacionesPrevias(c.nombre, c.empresa).filter(p => p.campana !== camp.title);
       const rows = [`
-      <tr class="row-hover-actions">
+      <tr class="row-hover-actions" style="${recordatorioEsUrgente(c) ? 'background:var(--crimson-bg);' : ''}">
         <td><input type="checkbox" ${seguimientoSeleccionados.has(key)?'checked':''} onchange="toggleSeguimientoCheck('${key.replace(/'/g,"\\'")}', this.checked)"></td>
         <td><button class="icon-btn" onclick="toggleExpand(${i})">${expandedIdx===i?'︿':'⌄'}</button></td>
         <td>
