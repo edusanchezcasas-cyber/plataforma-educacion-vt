@@ -403,13 +403,52 @@
           <button type="button" class="btn btn-ghost" onclick="descartarCampana()">Descartar</button>
           <button type="button" class="btn btn-primary" onclick="crearCampana()">Crear campaña y continuar →</button>
         </div>
+
+        <div class="card" id="envioCampanaToggleCard" style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <h3 style="font-size:15.5px;font-weight:800;color:var(--navy);margin:0;">¿Vas a enviar contactos a esta (u otra) campaña?</h3>
+            <div class="hint">Filtra tu Base de Contactos y envíalos sin salir de esta pantalla.</div>
+          </div>
+          <button class="btn btn-primary" id="btnToggleEnvioCampana" onclick="toggleEnvioCampana()">Enviar a una campaña</button>
+        </div>
+
+        <div id="envioCampanaWrap" style="display:none;">
+          <div class="card">
+            <div class="card-head"><h3>Campaña destino</h3><div class="hint">A qué campaña se agregan los contactos filtrados</div></div>
+            <div class="field">
+              <select id="filtroCampana" onchange="updateSegment()"></select>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Filtrar para enviar</h3><div class="hint">6 criterios disponibles</div></div>
+            <div class="filter-grid">
+              <div class="filter-card"><label>Puesto / Cargo</label><div id="msPuesto" class="multisel"></div></div>
+              <div class="filter-card"><label>Empresa</label><div id="msEmpresa" class="multisel"></div></div>
+              <div class="filter-card"><label>Sector</label><div id="msSector" class="multisel"></div></div>
+              <div class="filter-card"><label>Origen</label><div id="msOrigen" class="multisel"></div></div>
+              <div class="filter-card"><label>Fuente</label><div id="msFuente" class="multisel"></div></div>
+              <div class="filter-card"><label>Cliente o no cliente</label><div id="msCliente" class="multisel"></div></div>
+            </div>
+            <div class="segment-result"><div class="big" id="segmentCount">0</div><div><div class="lbl" id="segmentLbl">contactos coinciden con los filtros seleccionados</div><div class="lbl" id="segmentBaseLbl">de una base total de 0</div></div></div>
+            <div id="segmentPreview" style="margin-top:16px;"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Acción sobre el segmento</h3><div class="hint">El canal se elige por contacto, según lo que tenga registrado (ver columna "Canal" arriba)</div></div>
+            <div class="form-grid">
+              <div class="field"><label>Fecha de envío</label><input type="date" id="fechaEnvio" value="2026-07-03"></div>
+            </div>
+            <div style="margin-top:18px;display:flex;justify-content:flex-end;"><button class="btn btn-primary" id="btnEnviarSegmento" onclick="enviarSegmento()">Marcar como Enviado →</button></div>
+          </div>
+        </div>
       </div>
 
       <!-- BASE DE CONTACTOS -->
       <div class="view" id="v-publico">
         <div class="eyebrow">Gestión de contactos</div>
         <h1 class="section-title">Base de contactos</h1>
-        <p class="section-desc">Todos los contactos disponibles para invitar a campañas. Agrega nuevos o filtra para enviarlos a una campaña específica.</p>
+        <p class="section-desc">Todos los contactos disponibles para invitar a campañas. Agrega nuevos, filtra o edítalos aquí — para enviarlos a una campaña, ve a "Nueva campaña".</p>
 
 
         <div class="card">
@@ -500,45 +539,6 @@
               <thead><tr><th>Origen</th><th>Fuente</th><th>Sem.</th><th>Fecha</th><th>Origen de base</th><th>Apellidos y Nombres</th><th>Cargo</th><th>Cargo homologado</th><th>Sector</th><th>Teléfono</th><th>Teléfono 2</th><th>Correo</th><th>Correo 2</th><th>Empresa</th><th>Cliente</th><th>Acciones</th></tr></thead>
               <tbody id="baseBody"></tbody>
             </table>
-          </div>
-        </div>
-
-        <div class="card" id="envioCampanaToggleCard" style="display:flex;align-items:center;justify-content:space-between;">
-          <div>
-            <h3 style="font-size:15.5px;font-weight:800;color:var(--navy);margin:0;">¿Vas a enviar contactos a una campaña?</h3>
-            <div class="hint">Esto abre el filtro y el envío — solo lo necesitas cuando estés armando el público objetivo de una campaña.</div>
-          </div>
-          <button class="btn btn-primary" id="btnToggleEnvioCampana" onclick="toggleEnvioCampana()">Enviar a una campaña</button>
-        </div>
-
-        <div id="envioCampanaWrap" style="display:none;">
-          <div class="card">
-            <div class="card-head"><h3>Campaña destino</h3><div class="hint">A qué campaña se agregan los contactos filtrados</div></div>
-            <div class="field">
-              <select id="filtroCampana" onchange="updateSegment()"></select>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-head"><h3>Filtrar para enviar</h3><div class="hint">6 criterios disponibles</div></div>
-            <div class="filter-grid">
-              <div class="filter-card"><label>Puesto / Cargo</label><div id="msPuesto" class="multisel"></div></div>
-              <div class="filter-card"><label>Empresa</label><div id="msEmpresa" class="multisel"></div></div>
-              <div class="filter-card"><label>Sector</label><div id="msSector" class="multisel"></div></div>
-              <div class="filter-card"><label>Origen</label><div id="msOrigen" class="multisel"></div></div>
-              <div class="filter-card"><label>Fuente</label><div id="msFuente" class="multisel"></div></div>
-              <div class="filter-card"><label>Cliente o no cliente</label><div id="msCliente" class="multisel"></div></div>
-            </div>
-            <div class="segment-result"><div class="big" id="segmentCount">0</div><div><div class="lbl" id="segmentLbl">contactos coinciden con los filtros seleccionados</div><div class="lbl" id="segmentBaseLbl">de una base total de 0</div></div></div>
-            <div id="segmentPreview" style="margin-top:16px;"></div>
-          </div>
-
-          <div class="card">
-            <div class="card-head"><h3>Acción sobre el segmento</h3><div class="hint">El canal se elige por contacto, según lo que tenga registrado (ver columna "Canal" arriba)</div></div>
-            <div class="form-grid">
-              <div class="field"><label>Fecha de envío</label><input type="date" id="fechaEnvio" value="2026-07-03"></div>
-            </div>
-            <div style="margin-top:18px;display:flex;justify-content:flex-end;"><button class="btn btn-primary" id="btnEnviarSegmento" onclick="enviarSegmento()">Marcar como Enviado →</button></div>
           </div>
         </div>
       </div>
@@ -1063,13 +1063,13 @@
     persist();
     selectedCampaign = id;
     limpiarFormCampana();
-    switchView('publico');
     document.getElementById('envioCampanaWrap').style.display = 'block';
     document.getElementById('btnToggleEnvioCampana').textContent = 'Ocultar';
     document.getElementById('filtroCampana').value = id;
     renderAll();
     updateSegment();
-    showToast(`Campaña "${nuevaCampana.title}" creada. Ahora filtra y envía tu público objetivo.`);
+    showToast(`Campaña "${nuevaCampana.title}" creada. Ahora filtra y envía tu público objetivo, aquí mismo.`);
+    document.getElementById('envioCampanaWrap').scrollIntoView({ behavior:'smooth', block:'start' });
   }
 
   function toggleEnvioCampana(){
