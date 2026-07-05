@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Vinatea & Toyama School | Plataforma de Campañas</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#042433; --navy-soft:#0b3a4f; --navy-tint:#0e4a63;
+    --red:#E6223D; --red-soft:#fdeaec;
+    --bg:#F5F7F8; --card:#FFFFFF; --border:#E3E8EB;
+    --ink:#0C2530; --ink-dim:#5A6B72;
+    --amber:#B8790A; --amber-bg:#FEF3E0;
+    --blue:#1D5DA8; --blue-bg:#E9F1FB;
+    --green:#177A4C; --green-bg:#E6F5EE;
+    --gray:#5A6472; --gray-bg:#EEF0F2;
+    --crimson:#B0233B; --crimson-bg:#FCEAEC;
+    --purple:#6B3FA0; --purple-bg:#F1EAFA;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--ink);}
+  h1,h2,h3,.display{font-family:'Manrope',sans-serif;}
+  .app{display:flex;min-height:100vh;}
+  .sidebar{width:250px;flex-shrink:0;background:var(--navy);color:#fff;display:flex;flex-direction:column;padding:28px 0;}
+  .brand{padding:0 24px 28px 24px;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px;}
+  .brand-mark{display:flex;align-items:center;gap:10px;}
+  .brand-mark .dot{width:10px;height:10px;background:var(--red);border-radius:2px;transform:rotate(45deg);}
+  .brand-name{font-family:'Manrope',sans-serif;font-weight:800;font-size:16px;letter-spacing:0.3px;}
+  .brand-sub{font-size:11px;color:rgba(255,255,255,0.55);margin-top:4px;letter-spacing:0.4px;text-transform:uppercase;}
+  .nav{padding:0 14px;display:flex;flex-direction:column;gap:2px;}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:8px;color:rgba(255,255,255,0.68);font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;}
+  .nav-item svg{flex-shrink:0;opacity:.85;}
+  .nav-item:hover{background:rgba(255,255,255,0.06);color:#fff;}
+  .nav-item.active{background:var(--red);color:#fff;}
+  .sidebar-foot{margin-top:auto;padding:18px 24px 0 24px;border-top:1px solid rgba(255,255,255,0.1);font-size:11.5px;color:rgba(255,255,255,0.45);line-height:1.5;}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;}
+  .topbar{background:#fff;border-bottom:1px solid var(--border);padding:18px 32px;display:flex;align-items:center;justify-content:space-between;}
+  .topbar-title{font-size:20px;font-weight:800;color:var(--navy);}
+  .topbar-sub{font-size:12.5px;color:var(--ink-dim);margin-top:2px;}
+  .topbar-actions{display:flex;gap:10px;align-items:center;}
+  .btn{border:none;font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;padding:10px 18px;border-radius:8px;cursor:pointer;transition:opacity .15s,transform .1s;}
+  .btn:active{transform:scale(.98);}
+  .btn-primary{background:var(--red);color:#fff;}
+  .btn-primary:hover{opacity:.9;}
+  .btn-ghost{background:#fff;color:var(--navy);border:1px solid var(--border);}
+  .btn-ghost:hover{background:var(--bg);}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--navy-tint);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700;font-family:'Manrope';}
+  .content{padding:28px 32px 60px 32px;overflow-y:auto;}
+  .view{display:none;}
+  .view.active{display:block;animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  .eyebrow{font-size:11.5px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:var(--red);margin-bottom:6px;}
+  .section-title{font-size:22px;font-weight:800;color:var(--navy);margin:0 0 4px 0;}
+  .section-desc{font-size:13.5px;color:var(--ink-dim);margin:0 0 22px 0;}
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:26px;}
+  .kpi-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;}
+  .kpi-label{font-size:11.5px;color:var(--ink-dim);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;}
+  .kpi-value{font-family:'Manrope';font-size:28px;font-weight:800;color:var(--navy);margin-top:6px;}
+  .kpi-delta{font-size:12px;margin-top:4px;font-weight:600;}
+  .kpi-delta.up{color:var(--green);}
+  .kpi-delta.flat{color:var(--ink-dim);}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:22px;}
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:8px;}
+  .card-head h3{font-size:15.5px;font-weight:800;color:var(--navy);margin:0;}
+  .card-head .hint{font-size:12px;color:var(--ink-dim);}
+  .pipeline{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:4px;}
+  .pl-stage{flex:1;min-width:120px;position:relative;padding:16px 14px;border-radius:10px;margin-right:10px;}
+  .pl-stage:last-child{margin-right:0;}
+  .pl-stage .n{font-family:'Manrope';font-size:24px;font-weight:800;}
+  .pl-stage .lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;margin-top:4px;}
+  .pl-arrow{align-self:center;color:var(--border);font-size:18px;margin:0 2px;}
+  .pl-enviado{background:var(--blue-bg);color:var(--blue);}
+  .pl-evaluacion{background:var(--amber-bg);color:var(--amber);}
+  .pl-sinrespuesta{background:var(--gray-bg);color:var(--gray);}
+  .pl-rechazado{background:var(--crimson-bg);color:var(--crimson);}
+  .pl-aceptado{background:#EAF3FF;color:#1D5DA8;}
+  .pl-matriculado{background:var(--green-bg);color:var(--green);}
+  .pl-no_matriculado{background:var(--gray-bg);color:var(--gray);}
+  .pl-note{font-size:10px;margin-top:8px;line-height:1.4;opacity:.85;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  #v-campana .form-grid > .field:not(.full) input,
+  #v-campana .form-grid > .field:not(.full) select{max-width:340px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1/-1;}
+  .field label{font-size:12.5px;font-weight:600;color:var(--navy);}
+  .field .req{color:var(--red);}
+  .field select, .field input{border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Inter';font-size:13.5px;color:var(--ink);background:#fff;}
+  .field select:focus, .field input:focus{outline:none;border-color:var(--navy-tint);}
+  .title-preview{background:var(--bg);border:1px dashed var(--border);border-radius:8px;padding:14px 16px;font-size:13.5px;color:var(--navy);font-weight:600;margin-top:4px;}
+  .title-preview span{color:var(--ink-dim);font-weight:400;display:block;font-size:11px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+  .filter-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .filter-card{border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .filter-card.pending{border-color:#EFC97A;background:#FFFCF4;}
+  .filter-card label{font-size:12.5px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .pending-badge{font-size:9.5px;background:#EFC97A;color:#6B4E00;padding:2px 7px;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+  .new-badge{font-size:9.5px;background:var(--purple-bg);color:var(--purple);padding:2px 7px;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+  .filter-card select{width:100%;margin-top:8px;border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;font-family:'Inter';background:#fff;}
+  .multisel-dd{margin-top:8px;position:relative;}
+  .multisel-dd summary{list-style:none;cursor:pointer;border:1px solid var(--border);border-radius:7px;padding:8px 10px;font-size:13px;font-family:'Inter';background:#fff;display:flex;justify-content:space-between;align-items:center;}
+  .multisel-dd summary::-webkit-details-marker{display:none;}
+  .multisel-dd summary::after{content:'▾';color:var(--ink-dim);font-size:11px;flex-shrink:0;margin-left:8px;}
+  .multisel-dd[open] summary::after{content:'▴';}
+  .multisel-panel{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:8px;box-shadow:0 12px 32px rgba(0,0,0,0.18);padding:8px;z-index:200;}
+  .multisel-search{width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:12.5px;font-family:'Inter';margin-bottom:6px;}
+  .multisel-list{max-height:200px;overflow-y:auto;}
+  .multisel-opt{display:grid;grid-template-columns:16px 1fr;align-items:start;gap:8px;padding:6px 8px;font-size:12.5px;border-radius:6px;cursor:pointer;line-height:1.35;}
+  .multisel-opt:hover{background:var(--bg);}
+  .multisel-opt input{width:14px;height:14px;margin-top:1px;}
+  .multisel-empty{font-size:12px;color:var(--ink-dim);padding:8px;}
+  .segment-result{display:flex;align-items:center;gap:14px;background:var(--navy);color:#fff;border-radius:10px;padding:16px 20px;margin-top:20px;}
+  .segment-result .big{font-family:'Manrope';font-size:26px;font-weight:800;}
+  .segment-result .lbl{font-size:12px;color:rgba(255,255,255,0.7);}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--ink-dim);font-weight:700;padding:9px 10px;border-bottom:2px solid var(--border);white-space:nowrap;}
+  tbody td{padding:10px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tbody tr:hover{background:#FAFBFC;}
+  tr.detail-row{background:#FAFBFC;}
+  tr.detail-row:hover{background:#FAFBFC;}
+  .company{font-weight:700;color:var(--navy);}
+  .person-name{font-weight:700;color:var(--navy);}
+  .person-cargo{font-size:11px;color:var(--ink-dim);display:block;margin-top:1px;}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:20px;white-space:nowrap;}
+  .badge-enviado{background:var(--blue-bg);color:var(--blue);}
+  .badge-evaluacion{background:var(--amber-bg);color:var(--amber);}
+  .badge-sinrespuesta{background:var(--gray-bg);color:var(--gray);}
+  .badge-rechazado{background:var(--crimson-bg);color:var(--crimson);}
+  .badge-aceptado{background:#EAF3FF;color:#1D5DA8;}
+  .badge-matriculado{background:var(--green-bg);color:var(--green);}
+  .badge-no_matriculado{background:var(--gray-bg);color:var(--gray);}
+  .badge-origen{background:var(--purple-bg);color:var(--purple);}
+  .contact-dots{display:flex;gap:3px;}
+  .cdot{width:8px;height:8px;border-radius:50%;background:var(--border);}
+  .cdot.done{background:var(--navy-tint);}
+  .cdot.next{background:var(--red);}
+  .reminder{font-size:11px;color:var(--amber);font-weight:600;display:flex;align-items:center;gap:4px;white-space:nowrap;}
+  .obs{font-size:12px;color:var(--ink-dim);}
+  .icon-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-dim);font-size:13px;}
+  .icon-btn:hover{background:var(--bg);color:var(--navy);}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap;}
+  .search{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:8px;padding:8px 12px;background:#fff;min-width:240px;}
+  .search input{border:none;outline:none;font-size:13px;flex:1;font-family:'Inter';}
+  .chip-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:#fff;color:var(--ink-dim);cursor:pointer;}
+  .chip.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+  .banner{display:flex;gap:12px;align-items:flex-start;background:#FFFCF4;border:1px solid #EFC97A;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:12.5px;color:#6B4E00;line-height:1.5;}
+  .banner.info{background:#EEF6FB;border-color:#B9DCEF;color:#1D5DA8;}
+  .banner b{color:inherit;}
+  ::-webkit-scrollbar{height:8px;width:8px;}
+  ::-webkit-scrollbar-thumb{background:#D5DBDF;border-radius:8px;}
+  .camp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+  .camp-card{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:16px 18px;cursor:pointer;transition:border-color .15s;}
+  .camp-card:hover{border-color:#B9C3C9;}
+  .camp-card.selected{border-color:var(--red);box-shadow:0 0 0 3px var(--red-soft);}
+  .camp-tipo{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--red);}
+  .camp-title{font-size:13px;font-weight:700;color:var(--navy);margin:6px 0 8px 0;line-height:1.35;min-height:36px;}
+  .camp-date{font-size:11px;color:var(--navy-tint);font-weight:600;margin-bottom:8px;}
+  .camp-bar-track{height:6px;background:var(--gray-bg);border-radius:4px;overflow:hidden;}
+  .camp-bar-fill{height:100%;background:var(--navy-tint);border-radius:4px;}
+  .camp-meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;color:var(--ink-dim);}
+  .camp-meta b{color:var(--navy);font-weight:700;}
+  .edit-select{border:1px solid transparent;background:transparent;font-family:'Inter';font-size:10.5px;font-weight:700;border-radius:20px;padding:4px 8px;cursor:pointer;}
+  .edit-select:hover{border-color:var(--border);}
+  .edit-select.enviado{background:var(--blue-bg);color:var(--blue);}
+  .edit-select.evaluacion{background:var(--amber-bg);color:var(--amber);}
+  .edit-select.sinrespuesta{background:var(--gray-bg);color:var(--gray);}
+  .edit-select.rechazado{background:var(--crimson-bg);color:var(--crimson);}
+  .edit-select.aceptado{background:#EAF3FF;color:#1D5DA8;}
+  .edit-select.matriculado{background:var(--green-bg);color:var(--green);}
+  .edit-select.no_matriculado{background:var(--gray-bg);color:var(--gray);}
+  .edit-text{border:1px solid transparent;background:transparent;font-family:'Inter';font-size:12px;color:var(--ink-dim);width:100%;padding:4px 6px;border-radius:6px;}
+  .edit-text:hover, .edit-text:focus{border-color:var(--border);background:#fff;outline:none;}
+  .edit-num{border:1px solid transparent;background:transparent;font-family:'Inter';font-size:13px;width:40px;padding:4px 6px;border-radius:6px;color:var(--ink);}
+  .edit-num:hover, .edit-num:focus{border-color:var(--border);background:#fff;outline:none;}
+  .saved-flash{animation:flash 1s ease;}
+  @keyframes flash{0%{background:#FFF6D6;}100%{background:transparent;}}
+  .detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:16px 8px;font-size:12px;}
+  .detail-item .k{color:var(--ink-dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.3px;font-weight:700;}
+  .detail-item .v{color:var(--ink);margin-top:2px;}
+  .rondas-table{margin-top:8px;width:100%;font-size:11.5px;}
+  .rondas-table th{padding:6px 8px;}
+  .rondas-table td{padding:6px 8px;}
+  .save-indicator{font-size:11px;color:var(--ink-dim);display:flex;align-items:center;gap:6px;}
+  .save-indicator .dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="brand">
+      <div class="brand-mark" style="flex-direction:column;align-items:flex-start;gap:6px;">
+        <div style="font-family:'Manrope',sans-serif;font-weight:800;font-size:15px;color:#fff;line-height:1.15;letter-spacing:0.3px;">VINATEA<br>&amp; TOYAMA</div>
+        <div style="background:#fff;color:var(--red);font-family:'Manrope',sans-serif;font-weight:800;font-size:11px;letter-spacing:1px;padding:3px 9px;border-radius:3px;">SCHOOL</div>
+      </div>
+      <div class="brand-sub">Educación Ejecutiva · V&amp;T</div>
+    </div>
+    <div class="nav">
+      <div class="nav-item active" data-view="resumen">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+        Resumen
+      </div>
+      <div class="nav-item" data-view="campana">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Nueva campaña
+      </div>
+      <div class="nav-item" data-view="publico">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2M17 8.2a3 3 0 1 1 0 6M20 20c0-2.8-1.6-5-4-5.8"/></svg>
+        Base de contactos
+      </div>
+      <div class="nav-item" data-view="seguimiento">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Campañas y seguimiento
+      </div>
+      <div class="nav-item" data-view="historial">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3.5 3.5"/></svg>
+        Historial
+      </div>
+      <div class="nav-item" data-view="bi">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>
+        Panel BI
+      </div>
+      <div class="nav-item" data-view="config">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Configuración
+      </div>
+    </div>
+    <div class="sidebar-foot">Vinatea &amp; Toyama School<br>Gestión de campañas de educación ejecutiva</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topTitle">Resumen general</div>
+        <div class="topbar-sub" id="topSub">Estado de campañas de educación ejecutiva</div>
+      </div>
+      <div class="topbar-actions">
+        <div class="save-indicator" id="saveIndicator"><div class="dot"></div><span>Guardado</span></div>
+        <button class="btn btn-ghost">Exportar</button>
+        <button class="btn btn-primary">+ Nueva campaña</button>
+        <div class="avatar">ES</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- RESUMEN -->
+      <div class="view active" id="v-resumen">
+        <div class="eyebrow">Panel general</div>
+        <h1 class="section-title">Campañas de educación ejecutiva</h1>
+        <p class="section-desc">Vista consolidada de contactos por campaña, desde el envío hasta la matrícula.</p>
+        <div class="kpi-row" id="kpiRow"></div>
+        <div class="card">
+          <div class="card-head"><h3>Flujo de estados · Curso de SST</h3><div class="hint">Campaña activa</div></div>
+          <div class="pipeline" id="pipeline"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Campañas activas</h3><div class="hint" id="campCountHint"></div></div>
+          <table>
+            <thead><tr><th>Título</th><th>Tipo</th><th>Fechas</th><th>Cupos</th><th>Contactos</th></tr></thead>
+            <tbody id="resumenCampBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- NUEVA CAMPAÑA -->
+      <div class="view" id="v-campana">
+        <div class="eyebrow">Nueva campaña</div>
+        <h1 class="section-title">Información general de la nueva campaña</h1>
+        <p class="section-desc">Datos base de la oferta: escuela, tema específico y condiciones de la campaña.</p>
+        <div class="card">
+          <div class="form-grid">
+            <div class="field">
+              <label>Escuela <span class="req">*</span></label>
+              <select id="tipoOferta" style="max-width:360px;" onchange="updateTemaOptions(); updateTitlePreview();">
+                <option value="">Seleccionar…</option>
+                <option value="rrll">Escuela de Relaciones Laborales Aplicadas</option>
+                <option value="liderazgo">Escuela de Liderazgo y Habilidades Laborales</option>
+                <option value="conflictos">Escuela de Gestión de Conflictos y Negociación</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Tema específico <span class="req">*</span></label>
+              <div style="display:flex;gap:6px;max-width:360px;">
+                <select id="tema" style="flex:1;" onchange="updateTitlePreview()"><option value="">Selecciona una escuela primero…</option></select>
+                <button type="button" class="icon-btn" title="Agregar tema nuevo a esta escuela" onclick="promptAddTema()">+</button>
+              </div>
+            </div>
+            <div class="field full">
+              <label>Título de la campaña</label>
+              <div class="title-preview" style="padding:0;background:transparent;border:none;"><span>Se sugiere al elegir escuela y tema — puedes editarlo</span><input type="text" id="titlePreview" placeholder="Elige escuela y tema para sugerir un título, o escríbelo tú mismo…" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Inter';font-size:13.5px;color:var(--navy);font-weight:600;background:#fff;margin-top:4px;"></div>
+            </div>
+            <div class="field full">
+              <label>Analista(s) de educación responsable <span class="req">*</span></label>
+              <div id="analistasChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+              <div style="display:flex;gap:6px;max-width:400px;">
+                <select id="camp_analistaSelect" style="flex:1;" onchange="agregarAnalistaChip()"></select>
+                <button type="button" class="icon-btn" title="Crear nuevo analista" onclick="promptAddOption('analistas','camp_analistaSelect','Nombre del nuevo analista (ej. J. Torres)')">+</button>
+                <button type="button" class="icon-btn" title="Gestionar / eliminar analistas" onclick="gestionarLista('analistas','Analistas de educación')">🗑</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid" style="grid-template-columns:repeat(4,1fr);margin-top:18px;">
+            <div class="field"><label>Precio (S/)</label><input type="number" id="camp_precio" placeholder="0.00"></div>
+            <div class="field"><label>Cupos disponibles</label><input type="number" id="camp_cupos" placeholder="Ej. 20"></div>
+            <div class="field"><label>Fecha de inicio <span class="req">*</span></label><input type="date" id="camp_fechaInicio" value="2026-07-15"></div>
+            <div class="field"><label>Fecha de fin</label><input type="date" id="camp_fechaFin" value="2026-08-12"></div>
+          </div>
+
+          <div class="form-grid" style="margin-top:18px;">
+            <div class="field"><label>Duración</label><input type="text" id="camp_duracion" placeholder="Ej. 4 semanas · sábados"></div>
+            <div class="field">
+              <label>Docente(s)</label>
+              <div id="docentesChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;"></div>
+              <div style="display:flex;gap:6px;max-width:340px;">
+                <select id="camp_docenteSelect" style="flex:1;" onchange="agregarDocenteChip()"></select>
+                <button type="button" class="icon-btn" title="Crear nuevo docente" onclick="promptAddOption('docentesDisponibles','camp_docenteSelect','Nombre del nuevo docente')">+</button>
+                <button type="button" class="icon-btn" title="Gestionar / eliminar docentes" onclick="gestionarLista('docentesDisponibles','Docentes')">🗑</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid" style="margin-top:18px;">
+            <div class="field full">
+              <label>Adjuntar archivo (temario, flyer, etc.)</label>
+              <input type="file" id="camp_archivo" onchange="handleArchivoSeleccionado()">
+              <span id="camp_archivoNombre" class="help"></span>
+              <span class="help" style="color:var(--amber);">⚠️ Solo se guarda el nombre del archivo en este mockup — el contenido no se persiste todavía (el almacenamiento actual es solo texto). Cuando esto viva en una plataforma real, aquí se sube el archivo de verdad.</span>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="display:flex;justify-content:flex-end;gap:10px;">
+          <button type="button" class="btn btn-ghost" onclick="descartarCampana()">Descartar</button>
+          <button type="button" class="btn btn-primary" onclick="crearCampana()">Crear campaña y continuar →</button>
+        </div>
+      </div>
+
+      <!-- BASE DE CONTACTOS -->
+      <div class="view" id="v-publico">
+        <div class="eyebrow">Gestión de contactos</div>
+        <h1 class="section-title">Base de contactos</h1>
+        <p class="section-desc">Todos los contactos disponibles para invitar a campañas. Agrega nuevos o filtra para enviarlos a una campaña específica.</p>
+
+
+        <div class="card">
+          <div class="card-head">
+            <h3>Contactos en la base</h3>
+            <div class="hint" id="baseCountHint">0 contactos</div>
+          </div>
+          <div class="toolbar" style="margin-bottom:0;">
+            <div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" id="buscarBase" placeholder="Buscar por nombre o empresa…" oninput="renderBaseTable()"></div>
+            <button class="btn btn-primary" onclick="toggleAddForm()" id="btnToggleAdd">+ Agregar contacto</button>
+          </div>
+
+          <div id="addContactForm" style="display:none;margin-top:18px;padding-top:18px;border-top:1px solid var(--border);">
+            <h3 id="formTitle" style="font-size:14px;color:var(--navy);margin:0 0 14px 0;">Nuevo contacto</h3>
+            <div class="form-grid">
+              <div class="field"><label>Origen <span class="req">*</span></label>
+                <div style="display:flex;gap:6px;">
+                  <select id="nc_origen" style="flex:1;"></select>
+                  <button type="button" class="icon-btn" title="Agregar nuevo Origen" onclick="promptAddOption('origenOptions','nc_origen','Nuevo valor de Origen (ej. REFERIDOS)')">+</button>
+                  <button type="button" class="icon-btn" title="Gestionar / eliminar valores de Origen" onclick="gestionarLista('origenOptions','Origen')">🗑</button>
+                </div>
+              </div>
+              <div class="field"><label>Fuente <span class="req">*</span></label>
+                <div style="display:flex;gap:6px;">
+                  <select id="nc_fuente" style="flex:1;"></select>
+                  <button type="button" class="icon-btn" title="Agregar nueva Fuente" onclick="promptAddOption('fuenteOptions','nc_fuente','Nueva Fuente (ej. Referido)')">+</button>
+                  <button type="button" class="icon-btn" title="Gestionar / eliminar valores de Fuente" onclick="gestionarLista('fuenteOptions','Fuente')">🗑</button>
+                </div>
+              </div>
+              <div class="field"><label>Semana</label><input type="number" id="nc_semana" placeholder="Ej. 1"></div>
+              <div class="field"><label>Fecha</label><input type="date" id="nc_fecha"></div>
+              <div class="field"><label>Origen de base</label><input type="text" id="nc_origenDeBase" placeholder="Ej. Cliente VyT"></div>
+              <div class="field"><label>Apellidos y Nombres <span class="req">*</span></label><input type="text" id="nc_nombre" placeholder="Ej. De la Cruz Garcia, Grethel Cristina"></div>
+              <div class="field"><label>Cargo</label><input type="text" id="nc_cargo" placeholder="Cargo tal como lo dieron"></div>
+              <div class="field">
+                <label>Cargo homologado VyT</label>
+                <input type="text" id="nc_cargoHomologado" placeholder="Cargo en tu nomenclatura interna">
+                <span class="help" style="color:var(--amber);">⚠️ El "amarre" automático Cargo → Cargo homologado queda pendiente de diseño (proyecto mayor del estudio). Por ahora es texto libre.</span>
+              </div>
+              <div class="field"><label>Teléfono</label><input type="text" id="nc_telefono" placeholder="9XXXXXXXX"></div>
+              <div class="field"><label>Teléfono 2</label><input type="text" id="nc_telefono2" placeholder="Opcional"></div>
+              <div class="field"><label>Correo</label><input type="email" id="nc_correo" placeholder="correo@empresa.com"></div>
+              <div class="field"><label>Correo 2</label><input type="email" id="nc_correo2" placeholder="Opcional"></div>
+              <div class="field"><label>Empresa <span class="req">*</span></label>
+                <div style="display:flex;gap:6px;">
+                  <input type="text" id="nc_empresa" list="clientesVyTList" placeholder="Busca un cliente V&T…" style="flex:1;">
+                  <button type="button" class="icon-btn" title="Crear empresa nueva en la cartera" onclick="promptAddOption('clientesVyT','',null,true)">+</button>
+                  <button type="button" class="icon-btn" title="Gestionar / eliminar clientes" onclick="gestionarLista('clientesVyT','Cartera de clientes V&amp;T')">🗑</button>
+                </div>
+                <datalist id="clientesVyTList"></datalist>
+              </div>
+              <div class="field"><label>Cliente o no</label><select id="nc_cliente"><option value="SI">SI</option><option value="NO">NO</option></select></div>
+            </div>
+            <div id="nc_enviarDirectoWrap" style="margin-top:16px;padding:12px 14px;background:var(--bg);border-radius:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;color:var(--navy);cursor:pointer;">
+                <input type="checkbox" id="nc_enviarDirecto" checked style="width:16px;height:16px;">
+                Enviar también a la campaña destino seleccionada abajo <span id="nc_campDestinoLabel" style="color:var(--ink-dim);font-weight:400;"></span>
+              </label>
+              <select id="nc_canalEnvio" style="border:1px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12.5px;font-family:'Inter';"><option>WhatsApp</option><option>Correo</option><option>Teléfono</option></select>
+            </div>
+            <div style="margin-top:18px;display:flex;justify-content:flex-end;gap:10px;">
+              <button class="btn btn-ghost" onclick="toggleAddForm()">Cancelar</button>
+              <button class="btn btn-primary" id="btnGuardarContacto" onclick="guardarContacto()">Guardar contacto</button>
+            </div>
+          </div>
+
+          <div style="overflow-x:auto;margin-top:16px;">
+            <table>
+              <thead><tr><th>Origen</th><th>Fuente</th><th>Sem.</th><th>Fecha</th><th>Origen de base</th><th>Apellidos y Nombres</th><th>Cargo</th><th>Cargo homologado</th><th>Teléfono</th><th>Teléfono 2</th><th>Correo</th><th>Correo 2</th><th>Empresa</th><th>Cliente</th><th>Acciones</th></tr></thead>
+              <tbody id="baseBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card" id="envioCampanaToggleCard" style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <h3 style="font-size:15.5px;font-weight:800;color:var(--navy);margin:0;">¿Vas a enviar contactos a una campaña?</h3>
+            <div class="hint">Esto abre el filtro y el envío — solo lo necesitas cuando estés armando el público objetivo de una campaña.</div>
+          </div>
+          <button class="btn btn-primary" id="btnToggleEnvioCampana" onclick="toggleEnvioCampana()">Enviar a una campaña</button>
+        </div>
+
+        <div id="envioCampanaWrap" style="display:none;">
+          <div class="card">
+            <div class="card-head"><h3>Campaña destino</h3><div class="hint">A qué campaña se agregan los contactos filtrados</div></div>
+            <div class="field">
+              <select id="filtroCampana" onchange="updateSegment()"></select>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Filtrar para enviar</h3><div class="hint">6 criterios disponibles</div></div>
+            <div class="filter-grid">
+              <div class="filter-card"><label>Puesto / Cargo</label><div id="msPuesto" class="multisel"></div></div>
+              <div class="filter-card"><label>Empresa</label><div id="msEmpresa" class="multisel"></div></div>
+              <div class="filter-card"><label>Sector</label><div id="msSector" class="multisel"></div></div>
+              <div class="filter-card"><label>Origen</label><div id="msOrigen" class="multisel"></div></div>
+              <div class="filter-card"><label>Fuente</label><div id="msFuente" class="multisel"></div></div>
+              <div class="filter-card"><label>Cliente o no cliente</label><div id="msCliente" class="multisel"></div></div>
+            </div>
+            <div class="segment-result"><div class="big" id="segmentCount">0</div><div><div class="lbl" id="segmentLbl">contactos coinciden con los filtros seleccionados</div><div class="lbl" id="segmentBaseLbl">de una base total de 0</div></div></div>
+            <div id="segmentPreview" style="margin-top:16px;"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>Acción sobre el segmento</h3><div class="hint">Se aplica a los contactos filtrados</div></div>
+            <div class="form-grid">
+              <div class="field"><label>Tipo de comunicación</label><select id="canalEnvio"><option>WhatsApp</option><option>Correo</option><option>Teléfono</option></select></div>
+              <div class="field"><label>Fecha de envío</label><input type="date" id="fechaEnvio" value="2026-07-03"></div>
+            </div>
+            <div style="margin-top:18px;display:flex;justify-content:flex-end;"><button class="btn btn-primary" id="btnEnviarSegmento" onclick="enviarSegmento()">Marcar como Enviado →</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAMPAÑAS Y SEGUIMIENTO -->
+      <div class="view" id="v-seguimiento">
+        <div class="eyebrow">Todas las campañas</div>
+        <h1 class="section-title">Campañas y seguimiento</h1>
+        <p class="section-desc">Cada fila es un <b>contacto</b> (persona) dentro de una empresa. Haz clic en ⌄ para ver su ficha completa y el historial de las 5 rondas de contacto.</p>
+
+        <div class="camp-grid" id="campGrid"></div>
+
+        <div class="toolbar">
+          <div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" placeholder="Buscar contacto o empresa…"></div>
+          <div class="chip-row" id="statusChips">
+            <div class="chip active" data-status="todos">Todos</div>
+            <div class="chip" data-status="evaluacion">En evaluación</div>
+            <div class="chip" data-status="sinrespuesta">Sin respuesta</div>
+            <div class="chip" data-status="matriculado">Matriculado</div>
+            <div class="chip" data-status="no_matriculado">No matriculado</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;overflow-x:auto;">
+          <div class="card-head" style="padding:18px 20px 0 20px;"><h3 id="contactosTitle">Contactos · Curso de SST</h3><div class="hint">Nivel contacto/persona</div></div>
+          <div id="seguimientoBulkBar" style="display:none;padding:10px 20px;background:var(--bg);margin:12px 20px 0 20px;border-radius:8px;align-items:center;justify-content:space-between;">
+            <span style="font-size:12.5px;color:var(--navy);font-weight:700;"><span id="seguimientoSelCount">0</span> seleccionado(s)</span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-ghost" onclick="marcarSeleccionadosEstado('matriculado')">Marcar como Matriculado</button>
+              <button class="btn btn-ghost" onclick="marcarSeleccionadosEstado('no_matriculado')">Marcar como No matriculado</button>
+            </div>
+          </div>
+          <div style="padding:8px 20px 0 20px;display:flex;gap:14px;">
+            <span style="font-size:11.5px;color:var(--navy);font-weight:700;cursor:pointer;" onclick="seleccionarTodoSeguimiento(true)">Seleccionar todos</span>
+            <span style="font-size:11.5px;color:var(--ink-dim);font-weight:700;cursor:pointer;" onclick="seleccionarTodoSeguimiento(false)">Ninguno</span>
+          </div>
+          <table>
+            <thead><tr><th></th><th></th><th>Contacto</th><th>Empresa</th><th>Estado</th><th>Rondas</th><th>Canales disponibles</th><th>Recordatorio</th><th>Cupos</th><th>Recurrente</th><th>Observaciones</th></tr></thead>
+            <tbody id="contactosBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- HISTORIAL -->
+      <div class="view" id="v-historial">
+        <div class="eyebrow">Trazabilidad</div>
+        <h1 class="section-title">Historial de cambios</h1>
+        <p class="section-desc">Registro cronológico: quién, qué campo, valor anterior → valor nuevo. Se guarda de forma persistente.</p>
+        <div class="banner info">💾 <div>Este historial (y toda la plataforma) se guarda en un almacenamiento compartido, protegido por un proxy propio (Cloudflare Worker) — cualquier persona que abra esta página, desde donde sea, ve los mismos datos en tiempo casi real, sin exponer ninguna credencial en el código.</div></div>
+        <div class="toolbar">
+          <div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input type="text" placeholder="Buscar en historial…"></div>
+          <div class="chip-row" id="histCampFilter">
+            <div class="chip active" data-camp="todos">Todas las campañas</div>
+            <div class="chip" data-camp="sst">Curso SST</div>
+            <div class="chip" data-camp="liderazgo">Liderazgo</div>
+          </div>
+        </div>
+        <div class="card" style="padding:0;">
+          <table>
+            <thead><tr><th style="width:150px;">Fecha y hora</th><th>Usuario</th><th>Campaña</th><th>Cambio</th></tr></thead>
+            <tbody id="historialBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PANEL BI -->
+      <div class="view" id="v-bi">
+        <div class="eyebrow">Business Intelligence</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+          <div>
+            <h1 class="section-title">Panel BI · Campañas de educación ejecutiva</h1>
+            <p class="section-desc">Cifras calculadas en vivo sobre todas las campañas y contactos registrados.</p>
+          </div>
+          <button class="btn btn-ghost" id="btnToggleBIDemo" onclick="toggleBIDemo()">👁 Ver con datos de ejemplo</button>
+        </div>
+        <div id="biDemoBanner" style="display:none;" class="banner info">📊 <div>Estás viendo <b>datos de ejemplo inventados</b> para previsualizar cómo se ve el panel con más volumen — esto no es tu información real y no se guarda en ningún lado.</div></div>
+
+        <div class="kpi-row" id="biKpiRow"></div>
+
+        <div class="card">
+          <div class="card-head"><h3>🏆 Campañas con más matriculados</h3><div class="hint">Clic en una barra para ir a su seguimiento</div></div>
+          <div style="position:relative;height:260px;"><canvas id="chartCampanas"></canvas></div>
+          <div id="biCampanasEmpty"></div>
+        </div>
+
+        <div class="card">
+          <div class="grid" style="display:grid;grid-template-columns:1.3fr 1fr;gap:24px;align-items:start;">
+            <div>
+              <div class="card-head"><h3>🏢 Empresas con más participación</h3><div class="hint">Clic para filtrarla en Base de Contactos</div></div>
+              <div style="position:relative;height:280px;"><canvas id="chartEmpresas"></canvas></div>
+              <div id="biEmpresasEmpty"></div>
+            </div>
+            <div>
+              <div class="card-head"><h3>Distribución de estados</h3><div class="hint">Todas las campañas</div></div>
+              <div style="position:relative;height:240px;"><canvas id="chartEstados"></canvas></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><h3>🔁 Contactos más recurrentes</h3><div class="hint">Personas que aparecen en más de una campaña — clic para ver su historial</div></div>
+          <div id="biContactos"></div>
+        </div>
+      </div>
+
+      <!-- CONFIGURACIÓN -->
+      <div class="view" id="v-config">
+        <div class="eyebrow">Configuración</div>
+        <h1 class="section-title">Configuración de la plataforma</h1>
+        <p class="section-desc">Ajustes generales y opciones de mantenimiento de datos.</p>
+
+        <div class="card" style="border:1.5px solid var(--crimson);background:var(--crimson-bg);">
+          <div class="card-head"><h3 style="color:var(--crimson);">⚠️ Zona de peligro</h3><div class="hint">Estas acciones no se pueden deshacer</div></div>
+          <p style="font-size:13px;color:var(--ink);margin-bottom:16px;">Usa esto cuando termines de hacer una demo o prueba y quieras dejar la plataforma en blanco para el uso real del equipo. Se borran <b>todas las campañas, contactos y el historial</b>. Las listas de Origen, Fuente, Analistas, Docentes, Temas por escuela y Cartera de clientes <b>se conservan</b> (para no perder ese trabajo de configuración).</p>
+          <button class="btn btn-primary" style="background:var(--crimson);" onclick="confirmarReinicioDatos()">🗑 Reiniciar campañas, contactos e historial</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="manageListOverlay" style="display:none;position:fixed;inset:0;background:rgba(4,36,51,0.55);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;max-width:420px;width:90%;max-height:70vh;overflow-y:auto;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 id="manageListTitle" style="font-size:15px;color:var(--navy);margin:0;">Gestionar lista</h3>
+      <button class="icon-btn" onclick="document.getElementById('manageListOverlay').style.display='none'">✕</button>
+    </div>
+    <div id="manageListBody"></div>
+  </div>
+</div>
+
+<div id="contactHistOverlay" style="display:none;position:fixed;inset:0;background:rgba(4,36,51,0.55);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;max-width:640px;width:92%;max-height:80vh;overflow-y:auto;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 id="contactHistTitle" style="font-size:15px;color:var(--navy);margin:0;">Historial del contacto</h3>
+      <button class="icon-btn" onclick="document.getElementById('contactHistOverlay').style.display='none'">✕</button>
+    </div>
+    <div id="contactHistBody" style="font-size:13px;"></div>
+  </div>
+</div>
+
+<div id="promptOverlay" style="display:none;position:fixed;inset:0;background:rgba(4,36,51,0.55);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;max-width:420px;width:90%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <div id="promptMessage" style="font-size:13.5px;font-weight:600;color:var(--navy);margin-bottom:10px;"></div>
+    <input type="text" id="promptInput" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:'Inter';font-size:13.5px;">
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+      <button class="btn btn-ghost" id="promptCancelBtn">Cancelar</button>
+      <button class="btn btn-primary" id="promptOkBtn">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirmOverlay" style="display:none;position:fixed;inset:0;background:rgba(4,36,51,0.55);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;max-width:420px;width:90%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <div id="confirmMessage" style="font-size:14px;color:var(--ink);line-height:1.5;margin-bottom:20px;"></div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;">
+      <button class="btn btn-ghost" id="confirmCancelBtn">Cancelar</button>
+      <button class="btn btn-primary" id="confirmOkBtn" style="background:var(--crimson);">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastBox" style="display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,0.2);"></div>
+
+<script>
+  function showToast(msg){
+    const box = document.getElementById('toastBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    clearTimeout(box._t);
+    box._t = setTimeout(() => { box.style.display = 'none'; }, 3000);
+  }
+
+  function showConfirm(message, onConfirm, okLabel){
+    const overlay = document.getElementById('confirmOverlay');
+    document.getElementById('confirmMessage').textContent = message;
+    const okBtn = document.getElementById('confirmOkBtn');
+    okBtn.textContent = okLabel || 'Eliminar';
+    overlay.style.display = 'flex';
+    const cancelBtn = document.getElementById('confirmCancelBtn');
+    const cleanup = () => { overlay.style.display = 'none'; okBtn.onclick = null; cancelBtn.onclick = null; };
+    okBtn.onclick = () => { cleanup(); onConfirm(); };
+    cancelBtn.onclick = cleanup;
+  }
+
+  function showPrompt(message, onSubmit){
+    const overlay = document.getElementById('promptOverlay');
+    document.getElementById('promptMessage').textContent = message;
+    const input = document.getElementById('promptInput');
+    input.value = '';
+    overlay.style.display = 'flex';
+    setTimeout(() => input.focus(), 50);
+    const okBtn = document.getElementById('promptOkBtn');
+    const cancelBtn = document.getElementById('promptCancelBtn');
+    const cleanup = () => { overlay.style.display = 'none'; okBtn.onclick = null; cancelBtn.onclick = null; input.onkeydown = null; };
+    const submit = () => { const v = input.value.trim(); if (!v) return; cleanup(); onSubmit(v); };
+    okBtn.onclick = submit;
+    cancelBtn.onclick = cleanup;
+    input.onkeydown = (e) => { if (e.key === 'Enter') submit(); };
+  }
+
+  function confirmarReinicioDatos(){
+    showPrompt('Esta acción borrará TODAS las campañas, contactos e historial de forma permanente. Escribe BORRAR (en mayúsculas) para confirmar:', (valor) => {
+      if (valor.trim() !== 'BORRAR'){
+        showToast('No coincide con "BORRAR" — no se hizo ningún cambio.');
+        return;
+      }
+      campaigns = [];
+      historyLog = [];
+      contactBase = [];
+      selectedCampaign = null;
+      expandedIdx = null;
+      seguimientoSeleccionados = new Set();
+      persist();
+      renderAll();
+      showToast('Campañas, contactos e historial reiniciados. Las listas de configuración (Origen, Fuente, Analistas, Docentes, Clientes, Temas) se conservaron.');
+      switchView('campana');
+    });
+  }
+
+  // ===== Listas maestras extensibles (Origen, Fuente, Clientes VyT, Analistas, Docentes) =====
+  let origenOptions = ['EDUCACION', 'MKT', 'COMERCIAL'];
+  let fuenteOptions = ['Landing', 'Instagram', 'Base consolidada'];
+  let clientesVyT = ['Vinatea y Toyama', 'Prosegur', 'Alicorp', 'Minera Yanacocha', 'Backus', 'Securitas', 'Antamina', 'Ferreycorp', 'Cerro Verde'];
+  let analistas = ['Grethel Cristina De la Cruz Garcia'];
+  let analistasSeleccionados = [];
+  let docentesDisponibles = [];
+  let docentesSeleccionados = [];
+
+  function fillSelect(selectId, options, placeholder){
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    const prev = sel.value;
+    sel.innerHTML = (placeholder ? `<option value="">${placeholder}</option>` : '') + options.map(o => `<option ${o===prev?'selected':''}>${o}</option>`).join('');
+  }
+
+  function refreshOptionLists(){
+    fillSelect('nc_origen', origenOptions);
+    fillSelect('nc_fuente', fuenteOptions);
+    fillSelect('filtroOrigen', origenOptions, 'Todos');
+    fillSelect('filtroFuente', fuenteOptions, 'Todas');
+    fillSelect('camp_analistaSelect', analistas.filter(a => !analistasSeleccionados.includes(a)), 'Elegir analista…');
+    fillSelect('camp_docenteSelect', docentesDisponibles.filter(d => !docentesSeleccionados.includes(d)), docentesDisponibles.length === 0 ? 'Sin docentes registrados — crea uno con "+"' : 'Elegir docente…');
+    const dl = document.getElementById('clientesVyTList');
+    if (dl) dl.innerHTML = clientesVyT.map(c => `<option value="${c}">`).join('');
+  }
+
+  function getArrayByName(arrayName){
+    return { origenOptions, fuenteOptions, clientesVyT, analistas, docentesDisponibles }[arrayName];
+  }
+
+  function gestionarLista(arrayName, label){
+    document.getElementById('manageListTitle').textContent = `Gestionar · ${label}`;
+    renderManageListBody(arrayName, label);
+    document.getElementById('manageListOverlay').style.display = 'flex';
+  }
+
+  function renderManageListBody(arrayName, label){
+    const arr = getArrayByName(arrayName);
+    const body = document.getElementById('manageListBody');
+    if (arr.length === 0){
+      body.innerHTML = `<p style="color:var(--ink-dim);font-size:13px;">No hay valores registrados todavía.</p>`;
+      return;
+    }
+    body.innerHTML = `<div style="display:flex;flex-direction:column;gap:6px;">` +
+      arr.map((v,i) => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border:1px solid var(--border);border-radius:8px;">
+          <span style="font-size:13px;color:var(--ink);">${v}</span>
+          <button class="icon-btn" title="Eliminar de la lista" onclick="eliminarDeListaMaestra('${arrayName}', ${i}, '${label.replace(/'/g,"\\'")}')">🗑</button>
+        </div>`).join('') +
+      `</div>`;
+  }
+
+  function eliminarDeListaMaestra(arrayName, idx, label){
+    const arr = getArrayByName(arrayName);
+    const valor = arr[idx];
+    showConfirm(`¿Eliminar "${valor}" de la lista "${label}"? Si ya se usó en alguna campaña o contacto, esos registros no cambian — solo deja de aparecer como opción para elegir en el futuro.`, () => {
+      arr.splice(idx, 1);
+      // por si estaba seleccionado en el formulario actual de Nueva Campaña
+      if (arrayName === 'analistas') { analistasSeleccionados = analistasSeleccionados.filter(a => a !== valor); renderAnalistasChips(); }
+      if (arrayName === 'docentesDisponibles') { docentesSeleccionados = docentesSeleccionados.filter(d => d !== valor); renderDocentesChips(); }
+      persist();
+      refreshOptionLists();
+      renderManageListBody(arrayName, label);
+      showToast(`"${valor}" eliminado de la lista.`);
+    }, 'Eliminar');
+  }
+
+  function promptAddOption(arrayName, targetSelectId, message, isEmpresa){
+    const arr = { origenOptions, fuenteOptions, clientesVyT, analistas, docentesDisponibles }[arrayName];
+    showPrompt(message || 'Nuevo valor', (valor) => {
+      if (arr.includes(valor)){ showToast('Ya existe en la lista.'); return; }
+      arr.push(valor);
+      persist();
+      refreshOptionLists();
+      if (isEmpresa){
+        document.getElementById('nc_empresa').value = valor;
+        showToast(`"${valor}" agregada a la cartera de clientes V&T.`);
+      } else if (arrayName === 'docentesDisponibles'){
+        if (!docentesSeleccionados.includes(valor)) docentesSeleccionados.push(valor);
+        renderDocentesChips();
+        refreshOptionLists();
+        showToast(`Docente "${valor}" creado y agregado a la campaña.`);
+      } else if (targetSelectId){
+        document.getElementById(targetSelectId).value = valor;
+        showToast(`"${valor}" agregado.`);
+      }
+    });
+  }
+
+  function agregarAnalistaChip(){
+    const val = document.getElementById('camp_analistaSelect').value;
+    if (!val) return;
+    if (!analistasSeleccionados.includes(val)) analistasSeleccionados.push(val);
+    renderAnalistasChips();
+    refreshOptionLists();
+  }
+
+  function quitarAnalistaChip(nombre){
+    analistasSeleccionados = analistasSeleccionados.filter(a => a !== nombre);
+    renderAnalistasChips();
+    refreshOptionLists();
+  }
+
+  function renderAnalistasChips(){
+    document.getElementById('analistasChips').innerHTML = analistasSeleccionados.length === 0
+      ? `<span style="font-size:12px;color:var(--ink-dim);">Ninguno agregado todavía</span>`
+      : analistasSeleccionados.map(a => `<span class="badge badge-origen" style="padding:6px 10px;">${a} <span style="cursor:pointer;margin-left:4px;" onclick="quitarAnalistaChip('${a.replace(/'/g,"\\'")}')">✕</span></span>`).join('');
+  }
+
+  function agregarDocenteChip(){
+    const val = document.getElementById('camp_docenteSelect').value;
+    if (!val) return;
+    if (!docentesSeleccionados.includes(val)) docentesSeleccionados.push(val);
+    renderDocentesChips();
+    refreshOptionLists();
+  }
+
+  function quitarDocenteChip(nombre){
+    docentesSeleccionados = docentesSeleccionados.filter(d => d !== nombre);
+    renderDocentesChips();
+    refreshOptionLists();
+  }
+
+  function renderDocentesChips(){
+    document.getElementById('docentesChips').innerHTML = docentesSeleccionados.length === 0
+      ? `<span style="font-size:12px;color:var(--ink-dim);">Ninguno agregado todavía</span>`
+      : docentesSeleccionados.map(d => `<span class="badge badge-origen" style="padding:6px 10px;">${d} <span style="cursor:pointer;margin-left:4px;" onclick="quitarDocenteChip('${d.replace(/'/g,"\\'")}')">✕</span></span>`).join('');
+  }
+
+  // ===== Historial cruzado de un contacto en todas las campañas =====
+  function verHistorialContacto(nombre, empresa){
+    document.getElementById('contactHistTitle').textContent = `Historial · ${nombre}`;
+    const apariciones = campaigns
+      .map(camp => ({ camp, c: camp.contactos.find(x => x.nombre === nombre && x.empresa === empresa) }))
+      .filter(x => x.c);
+    const eventos = historyLog.filter(h => h.texto.startsWith(nombre + ':') || h.texto.includes(nombre));
+    let html = '';
+    if (apariciones.length === 0){
+      html += `<p style="color:var(--ink-dim);">Este contacto no está en el seguimiento de ninguna campaña todavía.</p>`;
+    } else {
+      html += `<table><thead><tr><th>Campaña</th><th>Estado</th><th>Cupos</th><th>Observaciones</th></tr></thead><tbody>` +
+        apariciones.map(({camp,c}) => `<tr><td class="company">${camp.title}</td><td><span class="badge badge-${c.estado}">${badgeLabel[c.estado]}</span></td><td>${c.cupos}</td><td><span class="obs">${c.obs}</span></td></tr>`).join('') +
+        `</tbody></table>`;
+    }
+    html += `<h4 style="font-size:12.5px;color:var(--navy);margin:18px 0 8px 0;">Movimientos registrados</h4>`;
+    html += eventos.length === 0
+      ? `<p style="color:var(--ink-dim);font-size:12.5px;">Sin movimientos de historial para este nombre.</p>`
+      : `<table><thead><tr><th style="width:130px;">Fecha</th><th>Cambio</th></tr></thead><tbody>` +
+        eventos.map(h => `<tr><td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-dim);">${h.fecha}</td><td>${h.texto}</td></tr>`).join('') +
+        `</tbody></table>`;
+    document.getElementById('contactHistBody').innerHTML = html;
+    document.getElementById('contactHistOverlay').style.display = 'flex';
+  }
+
+  const escuelaLabels = {
+    rrll: 'Escuela de Relaciones Laborales Aplicadas',
+    liderazgo: 'Escuela de Liderazgo y Habilidades Laborales',
+    conflictos: 'Escuela de Gestión de Conflictos y Negociación'
+  };
+  const escuelaCorta = {
+    'Escuela de Relaciones Laborales Aplicadas': 'Relaciones Laborales',
+    'Escuela de Liderazgo y Habilidades Laborales': 'Liderazgo',
+    'Escuela de Gestión de Conflictos y Negociación': 'Conflictos y Negociación'
+  };
+  let temasPorEscuela = {
+    rrll: ['Marco Legal Laboral', 'Relaciones sindicales', 'Gestión laboral estratégica', 'Compliance Laboral'],
+    liderazgo: ['Liderazgo situacional', 'Comunicación asertiva', 'Cultura y engagement', 'Gestión del desempeño'],
+    conflictos: ['Gestión de conflictos laborales', 'Negociación colectiva', 'Conversaciones difíciles', 'Mediación y arbitraje']
+  };
+  function tipoCorto(tipoCompleto){ return escuelaCorta[tipoCompleto] || tipoCompleto; }
+
+  function updateTemaOptions(){
+    const tipo = document.getElementById('tipoOferta').value;
+    const temaSel = document.getElementById('tema');
+    if (!tipo){
+      temaSel.innerHTML = '<option value="">Selecciona una escuela primero…</option>';
+      temaSel.disabled = true;
+      return;
+    }
+    temaSel.disabled = false;
+    temaSel.innerHTML = '<option value="">Seleccionar…</option>' + temasPorEscuela[tipo].map(t => `<option>${t}</option>`).join('');
+  }
+
+  function promptAddTema(){
+    const tipo = document.getElementById('tipoOferta').value;
+    if (!tipo){ showToast('Primero elige una Escuela.'); return; }
+    showPrompt(`Nuevo tema para "${escuelaLabels[tipo]}"`, (valor) => {
+      if (!temasPorEscuela[tipo].includes(valor)) temasPorEscuela[tipo].push(valor);
+      persist();
+      updateTemaOptions();
+      document.getElementById('tema').value = valor;
+      updateTitlePreview();
+      showToast(`Tema "${valor}" agregado a la escuela.`);
+    });
+  }
+
+  let tituloEditadoManualmente = false;
+  function updateTitlePreview(){
+    const tipo = document.getElementById('tipoOferta').value;
+    const tema = document.getElementById('tema').value.trim();
+    const el = document.getElementById('titlePreview');
+    if (tituloEditadoManualmente) return; // no pisar lo que el usuario ya escribió a mano
+    if (tipo && tema){
+      el.value = `${tema} — ${escuelaLabels[tipo]}`;
+    } else {
+      el.value = '';
+    }
+  }
+
+  function tipoLabel(v){ return escuelaLabels[v] || v; }
+
+  let archivoAdjuntoNombre = null;
+
+  function handleArchivoSeleccionado(){
+    const input = document.getElementById('camp_archivo');
+    archivoAdjuntoNombre = input.files && input.files[0] ? input.files[0].name : null;
+    document.getElementById('camp_archivoNombre').textContent = archivoAdjuntoNombre ? `📎 ${archivoAdjuntoNombre}` : '';
+  }
+
+  function limpiarFormCampana(){
+    document.getElementById('tipoOferta').value = '';
+    updateTemaOptions();
+    document.getElementById('titlePreview').value = '';
+    document.getElementById('titlePreview').placeholder = 'Elige escuela y tema para sugerir un título, o escríbelo tú mismo…';
+    analistasSeleccionados = [];
+    renderAnalistasChips();
+    docentesSeleccionados = [];
+    renderDocentesChips();
+    document.getElementById('camp_precio').value = '';
+    document.getElementById('camp_cupos').value = '';
+    document.getElementById('camp_fechaInicio').value = '2026-07-15';
+    document.getElementById('camp_fechaFin').value = '2026-08-12';
+    document.getElementById('camp_duracion').value = '';
+    document.getElementById('camp_archivo').value = '';
+    document.getElementById('camp_archivoNombre').textContent = '';
+    archivoAdjuntoNombre = null;
+    tituloEditadoManualmente = false;
+  }
+
+  function descartarCampana(){
+    limpiarFormCampana();
+    showToast('Formulario descartado.');
+  }
+
+  function crearCampana(){
+    const tipo = document.getElementById('tipoOferta').value;
+    const titulo = document.getElementById('titlePreview').value.trim();
+    const fechaInicioRaw = document.getElementById('camp_fechaInicio').value;
+    if (!tipo || !titulo || !fechaInicioRaw){
+      showToast('Completa al menos Tipo de oferta, Título y Fecha de inicio.');
+      return;
+    }
+    if (analistasSeleccionados.length === 0){
+      showToast('Agrega al menos un analista de educación responsable.');
+      return;
+    }
+    const fmtFecha = (raw) => { if (!raw) return '—'; const [y,m,d] = raw.split('-'); const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']; return `${parseInt(d)} ${meses[parseInt(m)-1]} ${y}`; };
+    const id = 'camp_' + Date.now();
+    const nuevaCampana = {
+      id, tipo: tipoLabel(tipo), title: titulo,
+      cupos: Number(document.getElementById('camp_cupos').value) || 0,
+      fechaInicio: fmtFecha(fechaInicioRaw),
+      fechaFin: fmtFecha(document.getElementById('camp_fechaFin').value),
+      analistas: [...analistasSeleccionados],
+      docentes: [...docentesSeleccionados],
+      archivoNombre: archivoAdjuntoNombre,
+      contactos: []
+    };
+    campaigns.push(nuevaCampana);
+    addHistoryEntry(id, nuevaCampana.title, 'Campaña creada', '—', `por ${analistasSeleccionados.join(', ')}${archivoAdjuntoNombre ? ` · adjunto: ${archivoAdjuntoNombre}` : ''}`);
+    persist();
+    selectedCampaign = id;
+    limpiarFormCampana();
+    switchView('publico');
+    document.getElementById('envioCampanaWrap').style.display = 'block';
+    document.getElementById('btnToggleEnvioCampana').textContent = 'Ocultar';
+    document.getElementById('filtroCampana').value = id;
+    renderAll();
+    updateSegment();
+    showToast(`Campaña "${nuevaCampana.title}" creada. Ahora filtra y envía tu público objetivo.`);
+  }
+
+  function toggleEnvioCampana(){
+    const wrap = document.getElementById('envioCampanaWrap');
+    const isHidden = wrap.style.display === 'none';
+    wrap.style.display = isHidden ? 'block' : 'none';
+    document.getElementById('btnToggleEnvioCampana').textContent = isHidden ? 'Ocultar' : 'Enviar a una campaña';
+    if (isHidden) updateSegment();
+  }
+
+  function eliminarCampana(id, event){
+    event.stopPropagation();
+    const camp = campaigns.find(c => c.id === id);
+    if (!camp) return;
+    const aviso = camp.contactos.length > 0 ? ` Tiene ${camp.contactos.length} contacto(s) asociado(s) que también se perderán.` : '';
+    showConfirm(`¿Eliminar la campaña "${camp.title}"?${aviso} Esta acción no se puede deshacer.`, () => {
+      campaigns = campaigns.filter(c => c.id !== id);
+      if (campaigns.length === 0){
+        campaigns.push({ id:'camp_'+Date.now(), tipo:'Escuela de Relaciones Laborales Aplicadas', title:'Nueva campaña sin nombre', cupos:0, fechaInicio:'—', fechaFin:'—', contactos:[] });
+      }
+      if (selectedCampaign === id) selectedCampaign = campaigns[0].id;
+      addHistoryEntry(selectedCampaign, camp.title, 'Campaña eliminada', camp.title, '—');
+      persist();
+      renderAll();
+      updateSegment();
+      showToast(`Campaña "${camp.title}" eliminada.`);
+    });
+  }
+
+  const badgeLabel = { enviado:'Enviado', evaluacion:'En evaluación', sinrespuesta:'Sin respuesta', rechazado:'Rechazado', aceptado:'Aceptado', matriculado:'Matriculado', no_matriculado:'No matriculado' };
+
+  const defaultCampaigns = [
+    {
+      id:'sst', tipo:'Escuela de Relaciones Laborales Aplicadas', title:'Curso de SST para Supervisores de Planta', cupos:20,
+      fechaInicio:'15 jul 2026', fechaFin:'12 ago 2026',
+      contactos:[
+        { nombre:'Grethel De la Cruz Garcia', cargo:'Gerente de Gestión Humana', cargoHomologado:'Gerente de Recursos Humanos', empresa:'Vinatea y Toyama', cliente:'Sí', origen:'EDUCACION', fuente:'Landing', semana:1, fecha:'02/06/2026', origenDeBase:'—', telefono:'988952458', telefono2:'—', correo:'grethel.delacruz@vyt.com', correo2:'—', respuestaAnterior:'Otra campaña', respuesta1:'No responde', respuesta2:'Revisando', respuestaFinal:'Evaluando', cupos:1, estado:'evaluacion', matriculado:'NO', obs:'No responde, volver a llamar / se envió whatsapp, desea que lo contactemos mañana / se envió correo', rondas:[{n:1,canal:'Llamada',fecha:'02/06/2026'},{n:2,canal:'WhatsApp',fecha:'05/06/2026'},{n:3,canal:'E-mail',fecha:'10/06/2026'}] },
+        { nombre:'Renzo Caballero Amado', cargo:'Gerente General', cargoHomologado:'Gerente General', empresa:'Prosegur', cliente:'No', origen:'MKT', fuente:'Instagram', semana:3, fecha:'16/06/2026', origenDeBase:'—', telefono:'987564700', telefono2:'4934279', correo:'renzo.caballero@segumaxperu.com', correo2:'—', respuestaAnterior:'—', respuesta1:'Revisando', respuesta2:'Evaluando', respuestaFinal:'No responde', cupos:0, estado:'sinrespuesta', matriculado:'NO', obs:'Se pasó la info, llamar mañana / le interesa el curso, revisará la info / no responde, dejó de responder', rondas:[{n:1,canal:'Correo',fecha:'— (no registrada)'}] },
+        { nombre:'Vilma Guevara Campos', cargo:'Analista de Capacitación', cargoHomologado:'Analista de Recursos Humanos', empresa:'Alicorp', cliente:'Sí', origen:'COMERCIAL', fuente:'Base consolidada', semana:4, fecha:'23/06/2026', origenDeBase:'Cliente VyT', telefono:'990094444', telefono2:'2089999', correo:'gc_milagros@yahoo.es', correo2:'—', respuestaAnterior:'—', respuesta1:'Revisando', respuesta2:'Evaluando', respuestaFinal:'Contacto de capacitación', cupos:5, estado:'matriculado', matriculado:'SI', obs:'Evalúa capacidad a 5 colaboradores / se envió info, llamar mañana / mañana enviará OS / inscribió a 5 personas', rondas:[{n:1,canal:'Teléfono',fecha:'— (no registrada)'}] },
+      ]
+    },
+    { id:'liderazgo', tipo:'Escuela de Liderazgo y Habilidades Laborales', title:'Programa de Liderazgo para Gerentes del Sector Minero', cupos:15, fechaInicio:'3 ago 2026', fechaFin:'28 ago 2026',
+      contactos:[
+        { nombre:'Ana Salvatierra Ruiz', cargo:'Gerente de Operaciones', cargoHomologado:'Gerente de Operaciones', empresa:'Compañía Minera Poderosa', cliente:'Sí', origen:'EDUCACION', fuente:'Base consolidada', semana:1, fecha:'01/07/2026', origenDeBase:'Cliente VyT', telefono:'944110023', telefono2:'—', correo:'ana.salvatierra@poderosa.com', correo2:'—', respuestaAnterior:'—', respuesta1:'—', respuesta2:'—', respuestaFinal:'—', cupos:0, estado:'enviado', matriculado:'NO', obs:'Enviado, sin respuesta aún', rondas:[{n:1,canal:'Correo',fecha:'01/07/2026'}] },
+      ] },
+    { id:'planillas', tipo:'Escuela de Relaciones Laborales Aplicadas', title:'Taller de Planillas para Contadores', cupos:30, fechaInicio:'20 jul 2026', fechaFin:'20 jul 2026', contactos:[] },
+    { id:'rrll', tipo:'Escuela de Gestión de Conflictos y Negociación', title:'Diplomado de Gestión de Sindicatos', cupos:25, fechaInicio:'10 ago 2026', fechaFin:'14 nov 2026', contactos:[] },
+  ];
+
+  const defaultHistory = [
+    { fecha:'01/07/2026 09:14', usuario:'M. Rojas', campId:'sst', campLabel:'Curso SST', texto:'Creó la campaña "Curso de SST para Supervisores de Planta"' },
+    { fecha:'16/06/2026 11:20', usuario:'M. Rojas', campId:'sst', campLabel:'Curso SST', texto:'Renzo Caballero Amado: Estado cambió de "Enviado" → "Sin respuesta"' },
+    { fecha:'23/06/2026 16:02', usuario:'M. Rojas', campId:'sst', campLabel:'Curso SST', texto:'Vilma Guevara Campos: Estado cambió de "En evaluación" → "Matriculado"' },
+    { fecha:'01/07/2026 10:40', usuario:'D. Vega', campId:'liderazgo', campLabel:'Liderazgo', texto:'Creó la campaña "Programa de Liderazgo para Gerentes del Sector Minero"' },
+  ];
+
+  // Base de contactos disponible para armar público objetivo (no asignados aún a ninguna campaña)
+  let contactBase = [
+    { origen:'EDUCACION', fuente:'Landing', semana:1, fecha:'2/06/2026', origenDeBase:'', nombre:'Grethel Cristina De la Cruz Garcia', cargo:'Gerente de gestión humana', cargoHomologado:'Gerente de Recursos Humanos', telefono:'988952458', telefono2:'', correo:'grethel.delacruz@vyt.com', correo2:'', empresa:'Vinatea y Toyama', cliente:'SI', sector:'Servicios' },
+    { origen:'EDUCACION', fuente:'Base consolidada', semana:1, fecha:'12/06/2026', origenDeBase:'Cliente VyT', nombre:'Jorge Huamán Ríos', cargo:'Jefe de Personal', cargoHomologado:'Jefe de Recursos Humanos', telefono:'955112233', telefono2:'', correo:'jorge.huaman@yanacocha.com', correo2:'', empresa:'Minera Yanacocha', cliente:'SI', sector:'Minería' },
+    { origen:'MKT', fuente:'Instagram', semana:2, fecha:'14/06/2026', origenDeBase:'', nombre:'Patricia Loayza Sifuentes', cargo:'Contador', cargoHomologado:'Contador General', telefono:'933441122', telefono2:'', correo:'patricia.loayza@backus.pe', correo2:'', empresa:'Backus', cliente:'NO', sector:'Consumo masivo' },
+    { origen:'EDUCACION', fuente:'Landing', semana:2, fecha:'15/06/2026', origenDeBase:'', nombre:'Carlos Ñahui Torres', cargo:'Gerente General', cargoHomologado:'Gerente General', telefono:'987001122', telefono2:'', correo:'carlos.nahui@securitas.pe', correo2:'', empresa:'Securitas', cliente:'NO', sector:'Seguridad' },
+    { origen:'COMERCIAL', fuente:'Base consolidada', semana:2, fecha:'17/06/2026', origenDeBase:'Cliente VyT', nombre:'Mariana Ponce Del Valle', cargo:'Gerente de Gestión Humana', cargoHomologado:'Gerente de Recursos Humanos', telefono:'944556677', telefono2:'', correo:'mariana.ponce@antamina.com', correo2:'', empresa:'Antamina', cliente:'SI', sector:'Minería' },
+    { origen:'MKT', fuente:'Instagram', semana:3, fecha:'18/06/2026', origenDeBase:'', nombre:'Diego Salazar Cueva', cargo:'Contador', cargoHomologado:'Contador General', telefono:'922334455', telefono2:'', correo:'diego.salazar@ferreycorp.pe', correo2:'', empresa:'Ferreycorp', cliente:'NO', sector:'Servicios' },
+    { origen:'EDUCACION', fuente:'Landing', semana:3, fecha:'19/06/2026', origenDeBase:'', nombre:'Lucía Bravo Espinoza', cargo:'Analista de Capacitación', cargoHomologado:'Analista de Recursos Humanos', telefono:'966778899', telefono2:'', correo:'lucia.bravo@prosegur.pe', correo2:'', empresa:'Prosegur', cliente:'NO', sector:'Seguridad' },
+    { origen:'COMERCIAL', fuente:'Base consolidada', semana:4, fecha:'22/06/2026', origenDeBase:'Cliente VyT', nombre:'Fernando Rojas Guzmán', cargo:'Jefe de Personal', cargoHomologado:'Jefe de Recursos Humanos', telefono:'911223344', telefono2:'', correo:'fernando.rojas@alicorp.com', correo2:'', empresa:'Alicorp', cliente:'SI', sector:'Consumo masivo' },
+    { origen:'EDUCACION', fuente:'Base consolidada', semana:4, fecha:'24/06/2026', origenDeBase:'Cliente VyT', nombre:'Gabriela Núñez Farfán', cargo:'Gerente General', cargoHomologado:'Gerente General', telefono:'977889900', telefono2:'', correo:'gabriela.nunez@cerroverde.com', correo2:'', empresa:'Cerro Verde', cliente:'SI', sector:'Minería' },
+  ];
+
+  let filtrosMulti = { puesto: [], empresa: [], sector: [], origen: [], fuente: [], cliente: [] };
+
+  function uniqueVals(field){ return [...new Set(contactBase.map(c => c[field]).filter(Boolean))].sort(); }
+
+  function renderMultiSel(containerId, key, options, labelMap){
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const prevDetails = el.querySelector('details');
+    const wasOpen = prevDetails ? prevDetails.open : false;
+    const selected = filtrosMulti[key];
+    const summary = selected.length === 0 ? (key==='empresa'?'Todas':key==='fuente'?'Todas':'Todos') : `${selected.length} seleccionado${selected.length>1?'s':''}`;
+    const needsSearch = options.length > 6;
+    el.innerHTML = `
+      <details class="multisel-dd" ${wasOpen ? 'open' : ''} data-key="${key}">
+        <summary>${summary}</summary>
+        <div class="multisel-panel">
+          ${needsSearch ? `<input type="text" class="multisel-search" placeholder="Buscar…" oninput="filterMultiOpts('${containerId}', this.value)">` : ''}
+          <div class="multisel-list">
+            <label class="multisel-opt"><input type="checkbox" ${selected.length===0?'checked':''} onchange="toggleMultiTodos('${key}')"><b>Todos</b></label>
+            ${options.map(o => `<label class="multisel-opt" data-text="${String(o).toLowerCase()}"><input type="checkbox" ${selected.includes(o)?'checked':''} onchange="toggleMultiOpt('${key}','${String(o).replace(/'/g,"\\'")}')"><span>${labelMap ? labelMap(o) : o}</span></label>`).join('')}
+            <div class="multisel-empty" style="display:none;">Sin resultados.</div>
+          </div>
+        </div>
+      </details>`;
+  }
+
+  function filterMultiOpts(containerId, query){
+    const el = document.getElementById(containerId);
+    const q = query.trim().toLowerCase();
+    const opts = el.querySelectorAll('.multisel-opt[data-text]');
+    let visibleCount = 0;
+    opts.forEach(opt => {
+      const match = !q || opt.dataset.text.includes(q);
+      opt.style.display = match ? 'grid' : 'none';
+      if (match) visibleCount++;
+    });
+    el.querySelector('.multisel-empty').style.display = visibleCount === 0 ? 'block' : 'none';
+  }
+
+  // Cierra cualquier multiselect abierto si se hace clic fuera de él
+  document.addEventListener('click', (e) => {
+    document.querySelectorAll('.multisel-dd[open]').forEach(dd => {
+      if (!dd.contains(e.target)) dd.open = false;
+    });
+  });
+
+  function renderAllMultiSelects(){
+    renderMultiSel('msPuesto', 'puesto', uniqueVals('cargo'));
+    renderMultiSel('msEmpresa', 'empresa', uniqueVals('empresa'));
+    renderMultiSel('msSector', 'sector', uniqueVals('sector'));
+    renderMultiSel('msOrigen', 'origen', origenOptions);
+    renderMultiSel('msFuente', 'fuente', fuenteOptions);
+    renderMultiSel('msCliente', 'cliente', ['SI','NO'], (v) => v==='SI' ? 'Cliente' : 'No cliente');
+  }
+
+  function toggleMultiTodos(key){
+    filtrosMulti[key] = [];
+    renderAllMultiSelects();
+    updateSegment();
+  }
+
+  function toggleMultiOpt(key, val){
+    const arr = filtrosMulti[key];
+    const idx = arr.indexOf(val);
+    if (idx >= 0) arr.splice(idx,1); else arr.push(val);
+    renderAllMultiSelects();
+    updateSegment();
+  }
+
+  function populateFilterOptions(){
+    const campSel = document.getElementById('filtroCampana');
+    const prevCamp = campSel.value;
+    campSel.innerHTML = campaigns.map(c => `<option value="${c.id}">${c.title}</option>`).join('');
+    if (prevCamp) campSel.value = prevCamp;
+  }
+
+  let editingContactIdx = null;
+
+  function toggleAddForm(forEdit){
+    const form = document.getElementById('addContactForm');
+    const isHidden = form.style.display === 'none';
+    if (!forEdit) editingContactIdx = null; // abrir/cerrar manualmente en modo agregar
+    form.style.display = isHidden ? 'block' : 'none';
+    document.getElementById('formTitle').textContent = editingContactIdx !== null ? 'Editar contacto' : 'Nuevo contacto';
+    document.getElementById('btnGuardarContacto').textContent = editingContactIdx !== null ? 'Guardar cambios' : 'Guardar contacto';
+    document.getElementById('btnToggleAdd').textContent = isHidden ? 'Cancelar' : '+ Agregar contacto';
+    if (isHidden && editingContactIdx === null) {
+      ['nc_semana','nc_origenDeBase','nc_nombre','nc_cargo','nc_cargoHomologado','nc_telefono','nc_telefono2','nc_correo','nc_correo2','nc_empresa'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('nc_origen').value = 'EDUCACION';
+      document.getElementById('nc_fuente').value = 'Landing';
+      document.getElementById('nc_cliente').value = 'SI';
+      document.getElementById('nc_fecha').valueAsDate = new Date();
+    }
+  }
+
+  function editarContacto(idx){
+    const c = contactBase[idx];
+    editingContactIdx = idx;
+    document.getElementById('nc_origen').value = c.origen;
+    document.getElementById('nc_fuente').value = c.fuente;
+    document.getElementById('nc_semana').value = c.semana === '—' ? '' : c.semana;
+    if (c.fecha && c.fecha !== '—' && c.fecha.includes('/')){
+      const [d,m,y] = c.fecha.split('/');
+      document.getElementById('nc_fecha').value = `${y}-${m}-${d}`;
+    } else {
+      document.getElementById('nc_fecha').value = '';
+    }
+    document.getElementById('nc_origenDeBase').value = c.origenDeBase || '';
+    document.getElementById('nc_nombre').value = c.nombre;
+    document.getElementById('nc_cargo').value = c.cargo === '—' ? '' : c.cargo;
+    document.getElementById('nc_cargoHomologado').value = c.cargoHomologado === '—' ? '' : c.cargoHomologado;
+    document.getElementById('nc_telefono').value = c.telefono === '—' ? '' : c.telefono;
+    document.getElementById('nc_telefono2').value = c.telefono2 || '';
+    document.getElementById('nc_correo').value = c.correo === '—' ? '' : c.correo;
+    document.getElementById('nc_correo2').value = c.correo2 || '';
+    document.getElementById('nc_empresa').value = c.empresa;
+    document.getElementById('nc_cliente').value = c.cliente;
+    document.getElementById('addContactForm').style.display = 'block';
+    document.getElementById('formTitle').textContent = 'Editar contacto';
+    document.getElementById('btnGuardarContacto').textContent = 'Guardar cambios';
+    document.getElementById('btnToggleAdd').textContent = 'Cancelar';
+    document.getElementById('addContactForm').scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+
+  function eliminarContacto(idx){
+    const c = contactBase[idx];
+    showConfirm(`¿Estás seguro que deseas eliminar a "${c.nombre}" (${c.empresa}) de la base de contactos? Esta acción no se puede deshacer.`, () => {
+      contactBase.splice(idx, 1);
+      persist();
+      populateFilterOptions();
+      renderBaseTable();
+      updateSegment();
+      showToast(`"${c.nombre}" eliminado de la base.`);
+    });
+  }
+
+  function guardarContacto(){
+    const nombre = document.getElementById('nc_nombre').value.trim();
+    const empresa = document.getElementById('nc_empresa').value.trim();
+    if (!nombre || !empresa){
+      showToast('Nombre y Empresa son obligatorios.');
+      return;
+    }
+    const fechaRaw = document.getElementById('nc_fecha').value;
+    let fecha = '—';
+    if (fechaRaw){ const [y,m,d] = fechaRaw.split('-'); fecha = `${d}/${m}/${y}`; }
+    const datos = {
+      origen: document.getElementById('nc_origen').value,
+      fuente: document.getElementById('nc_fuente').value,
+      semana: document.getElementById('nc_semana').value || '—',
+      fecha,
+      origenDeBase: document.getElementById('nc_origenDeBase').value || '',
+      nombre,
+      cargo: document.getElementById('nc_cargo').value || '—',
+      cargoHomologado: document.getElementById('nc_cargoHomologado').value || '—',
+      telefono: document.getElementById('nc_telefono').value || '—',
+      telefono2: document.getElementById('nc_telefono2').value || '',
+      correo: document.getElementById('nc_correo').value || '—',
+      correo2: document.getElementById('nc_correo2').value || '',
+      empresa,
+      cliente: document.getElementById('nc_cliente').value,
+      sector: '—'
+    };
+    if (editingContactIdx !== null){
+      contactBase[editingContactIdx] = datos;
+    } else {
+      contactBase.push(datos);
+      // Envío directo a la campaña destino, si el usuario lo dejó marcado
+      const enviarDirecto = document.getElementById('nc_enviarDirecto').checked;
+      const campId = document.getElementById('filtroCampana').value;
+      const camp = campaigns.find(x => x.id === campId);
+      if (enviarDirecto && camp){
+        const canal = document.getElementById('nc_canalEnvio').value;
+        camp.contactos.push({
+          nombre: datos.nombre, cargo: datos.cargo, cargoHomologado: datos.cargoHomologado, empresa: datos.empresa,
+          cliente: datos.cliente === 'SI' ? 'Sí' : 'No', origen: datos.origen, fuente: datos.fuente, semana: datos.semana,
+          fecha: datos.fecha, origenDeBase: datos.origenDeBase || '—', telefono: datos.telefono, telefono2: datos.telefono2 || '—',
+          correo: datos.correo, correo2: datos.correo2 || '—', respuestaAnterior:'—', respuesta1:'—', respuesta2:'—', respuestaFinal:'—',
+          cupos: 0, estado: 'enviado', matriculado: 'NO', obs: 'Recién enviado, sin respuesta todavía',
+          rondas: [{ n:1, canal, fecha: datos.fecha }]
+        });
+        addHistoryEntry(campId, datos.nombre, 'Contacto agregado y enviado', '—', `Enviado por ${canal} a "${camp.title}"`);
+        selectedCampaign = campId;
+      }
+    }
+    persist();
+    editingContactIdx = null;
+    document.getElementById('addContactForm').style.display = 'none';
+    document.getElementById('btnToggleAdd').textContent = '+ Agregar contacto';
+    renderAll();
+    updateSegment();
+  }
+
+  function renderBaseTable(){
+    const body = document.getElementById('baseBody');
+    const q = (document.getElementById('buscarBase').value || '').toLowerCase();
+    const filtered = contactBase
+      .map((c, i) => ({ c, i }))
+      .filter(({c}) => !q || c.nombre.toLowerCase().includes(q) || c.empresa.toLowerCase().includes(q));
+    document.getElementById('baseCountHint').textContent = contactBase.length + ' contacto' + (contactBase.length===1?'':'s') + (q ? ` · ${filtered.length} coinciden con "${q}"` : '');
+    body.innerHTML = filtered.length === 0
+      ? `<tr><td colspan="15" style="text-align:center;color:var(--ink-dim);padding:24px;">Sin contactos en la base todavía.</td></tr>`
+      : filtered.map(({c, i}) => `
+        <tr>
+          <td><span class="badge badge-origen">${c.origen}</span></td>
+          <td>${c.fuente}</td>
+          <td>${c.semana}</td>
+          <td>${c.fecha}</td>
+          <td>${c.origenDeBase || '—'}</td>
+          <td class="person-name">${c.nombre}</td>
+          <td>${c.cargo}</td>
+          <td>${c.cargoHomologado}</td>
+          <td>${c.telefono}</td>
+          <td>${c.telefono2 || '—'}</td>
+          <td>${c.correo}</td>
+          <td>${c.correo2 || '—'}</td>
+          <td>${c.empresa}</td>
+          <td>${c.cliente}</td>
+          <td style="white-space:nowrap;"><button class="icon-btn" title="Editar" onclick="editarContacto(${i})">✎</button> <button class="icon-btn" title="Eliminar" onclick="eliminarContacto(${i})">🗑</button> <button class="icon-btn" title="Ver historial en todas las campañas" onclick="verHistorialContacto('${c.nombre.replace(/'/g,"\\'")}','${c.empresa.replace(/'/g,"\\'")}')">🕐</button></td>
+        </tr>`).join('');
+  }
+
+  function getFilteredSegment(){
+    const campId = document.getElementById('filtroCampana').value;
+    const camp = campaigns.find(c => c.id === campId);
+    const yaEnCampana = new Set((camp ? camp.contactos : []).map(c => c.nombre + '|' + c.empresa));
+    const f = filtrosMulti;
+    return contactBase.filter(c =>
+      (f.puesto.length === 0 || f.puesto.includes(c.cargo)) &&
+      (f.empresa.length === 0 || f.empresa.includes(c.empresa)) &&
+      (f.sector.length === 0 || f.sector.includes(c.sector)) &&
+      (f.origen.length === 0 || f.origen.includes(c.origen)) &&
+      (f.fuente.length === 0 || f.fuente.includes(c.fuente)) &&
+      (f.cliente.length === 0 || f.cliente.includes(c.cliente)) &&
+      !yaEnCampana.has(c.nombre + '|' + c.empresa)
+    );
+  }
+
+  function participacionesPrevias(nombre, empresa){
+    const apariciones = [];
+    campaigns.forEach(camp => {
+      const c = camp.contactos.find(x => x.nombre === nombre && x.empresa === empresa);
+      if (c) apariciones.push({ campana: camp.title, estado: c.estado, canal: c.rondas.length ? c.rondas[c.rondas.length-1].canal : '—' });
+    });
+    return apariciones;
+  }
+
+  let segmentoMatched = [];
+  let segmentoSeleccionados = new Set();
+
+  function claveContacto(c){ return c.nombre + '|' + c.empresa; }
+
+  function updateSegment(){
+    segmentoMatched = getFilteredSegment();
+    segmentoSeleccionados = new Set(segmentoMatched.map(claveContacto));
+    document.getElementById('segmentBaseLbl').textContent = 'de una base total de ' + contactBase.length;
+    renderSegmentPreview();
+  }
+
+  function renderSegmentPreview(){
+    const matched = segmentoMatched;
+    document.getElementById('segmentCount').textContent = segmentoSeleccionados.size;
+    const campId = document.getElementById('filtroCampana').value;
+    const camp = campaigns.find(c => c.id === campId);
+    document.getElementById('btnEnviarSegmento').textContent = `Marcar como Enviado (${segmentoSeleccionados.size} contacto${segmentoSeleccionados.size===1?'':'s'})${camp ? ' → ' + camp.title.split(' ').slice(0,4).join(' ') + '…' : ''}`;
+    const ncLabel = document.getElementById('nc_campDestinoLabel');
+    if (ncLabel) ncLabel.textContent = camp ? `("${camp.title}")` : '';
+    const preview = document.getElementById('segmentPreview');
+    if (matched.length === 0){
+      preview.innerHTML = `<div style="font-size:12.5px;color:var(--ink-dim);">Ningún contacto de la base coincide con estos filtros (o ya están en esta campaña).</div>`;
+      return;
+    }
+    preview.innerHTML = `
+      <div style="display:flex;gap:14px;margin-bottom:8px;">
+        <span style="font-size:11.5px;color:var(--navy);font-weight:700;cursor:pointer;" onclick="seleccionarTodoSegmento(true)">Seleccionar todos</span>
+        <span style="font-size:11.5px;color:var(--ink-dim);font-weight:700;cursor:pointer;" onclick="seleccionarTodoSegmento(false)">Ninguno</span>
+      </div>
+      <table><thead><tr><th></th><th>Apellidos y Nombres</th><th>Cargo</th><th>Empresa</th><th>Origen</th><th>Fuente</th><th>Participación previa</th></tr></thead><tbody>
+      ${matched.map(c => {
+        const key = claveContacto(c);
+        const previas = participacionesPrevias(c.nombre, c.empresa);
+        const previaHtml = previas.length === 0
+          ? '<span style="color:var(--ink-dim);font-size:11.5px;">Primera vez</span>'
+          : `<span class="badge badge-origen" style="cursor:pointer;" onclick="verHistorialContacto('${c.nombre.replace(/'/g,"\\'")}','${c.empresa.replace(/'/g,"\\'")}')" title="${previas.map(p=>p.campana+': '+badgeLabel[p.estado]).join(' · ')}">🔁 En ${previas.length} campaña${previas.length>1?'s':''} · último canal ${previas[previas.length-1].canal}</span>`;
+        return `<tr>
+          <td><input type="checkbox" ${segmentoSeleccionados.has(key)?'checked':''} onchange="toggleSegmentoContacto('${key.replace(/'/g,"\\'")}', this.checked)"></td>
+          <td class="person-name">${c.nombre}</td><td>${c.cargo}</td><td>${c.empresa}</td>
+          <td><span class="badge badge-origen">${c.origen}</span></td><td>${c.fuente}</td>
+          <td>${previaHtml}</td>
+        </tr>`;
+      }).join('')}
+      </tbody></table>`;
+  }
+
+  function toggleSegmentoContacto(key, checked){
+    if (checked) segmentoSeleccionados.add(key); else segmentoSeleccionados.delete(key);
+    document.getElementById('segmentCount').textContent = segmentoSeleccionados.size;
+    const campId = document.getElementById('filtroCampana').value;
+    const camp = campaigns.find(c => c.id === campId);
+    document.getElementById('btnEnviarSegmento').textContent = `Marcar como Enviado (${segmentoSeleccionados.size} contacto${segmentoSeleccionados.size===1?'':'s'})${camp ? ' → ' + camp.title.split(' ').slice(0,4).join(' ') + '…' : ''}`;
+  }
+
+  function seleccionarTodoSegmento(todos){
+    segmentoSeleccionados = todos ? new Set(segmentoMatched.map(claveContacto)) : new Set();
+    renderSegmentPreview();
+  }
+
+  function enviarSegmento(){
+    const matched = segmentoMatched.filter(c => segmentoSeleccionados.has(claveContacto(c)));
+    if (matched.length === 0){ showToast('No hay contactos seleccionados para enviar.'); return; }
+    const campId = document.getElementById('filtroCampana').value;
+    const camp = campaigns.find(c => c.id === campId);
+    if (!camp){ showToast('Primero crea una campaña en "Nueva campaña".'); return; }
+    const canal = document.getElementById('canalEnvio').value;
+    const fechaRaw = document.getElementById('fechaEnvio').value;
+    const [y,m,d] = fechaRaw.split('-');
+    const fecha = `${d}/${m}/${y}`;
+    matched.forEach(c => {
+      camp.contactos.push({
+        nombre:c.nombre, cargo:c.cargo, cargoHomologado:c.cargoHomologado, empresa:c.empresa, cliente: c.cliente==='SI'?'Sí':'No',
+        origen:c.origen, fuente:c.fuente, semana:c.semana, fecha:c.fecha, origenDeBase:c.origenDeBase || '—', telefono:c.telefono, telefono2:c.telefono2 || '—',
+        correo:c.correo, correo2:c.correo2 || '—', respuestaAnterior:'—', respuesta1:'—', respuesta2:'—', respuestaFinal:'—',
+        cupos:0, estado:'enviado', matriculado:'NO', obs:'Recién enviado, sin respuesta todavía',
+        rondas:[{ n:1, canal, fecha }]
+      });
+    });
+    addHistoryEntry(campId, `Segmento (${matched.length} contactos)`, 'Envío masivo', '—', `Enviado por ${canal} el ${fecha}`);
+    persist();
+    selectedCampaign = campId;
+    renderAll();
+    updateSegment();
+    const btn = document.getElementById('btnEnviarSegmento');
+    const original = btn.textContent;
+    btn.textContent = `✓ ${matched.length} contactos agregados a "${camp.title}"`;
+    setTimeout(() => updateSegment(), 2200);
+  }
+
+  let campaigns = defaultCampaigns;
+  let historyLog = defaultHistory;
+  let selectedCampaign = 'sst';
+  let selectedStatus = 'todos';
+  let histCampFilter = 'todos';
+  let expandedIdx = null;
+
+  function setSaveIndicator(state){
+    const el = document.getElementById('saveIndicator');
+    if (state === 'saving'){ el.innerHTML = '<div class="dot" style="background:var(--amber)"></div><span>Guardando…</span>'; }
+    else if (state === 'error'){ el.innerHTML = '<div class="dot" style="background:var(--crimson)"></div><span>Sin conexión — cambios solo en esta sesión</span>'; }
+    else { el.innerHTML = '<div class="dot"></div><span>Guardado</span>'; }
+  }
+
+  // ===== Almacenamiento compartido real vía Cloudflare Worker (esconde la key de JSONbin) =====
+  const PROXY_URL = 'https://plataforma-educacion-proxy.edusanchezcasas.workers.dev/';
+
+  async function persist(){
+    setSaveIndicator('saving');
+    const payload = JSON.stringify({ campaigns, historyLog, contactBase, origenOptions, fuenteOptions, clientesVyT, analistas, temasPorEscuela, docentesDisponibles });
+    for (let attempt = 1; attempt <= 3; attempt++){
+      try{
+        const res = await fetch(PROXY_URL, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload
+        });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        setSaveIndicator('ok');
+        return;
+      }catch(e){
+        console.error(`Storage error (intento ${attempt})`, e);
+        if (attempt < 3){
+          await new Promise(r => setTimeout(r, 600 * attempt)); // pequeña espera antes de reintentar
+        } else {
+          setSaveIndicator('error');
+          showToast('No se pudo guardar en este momento (falla temporal de conexión). Tus cambios siguen aquí en pantalla, pero intenta guardar de nuevo en unos segundos.');
+        }
+      }
+    }
+  }
+
+  async function loadState(){
+    try{
+      const res = await fetch(PROXY_URL);
+      if (res.ok){
+        const json = await res.json();
+        const data = json.record || {};
+        campaigns = (data.campaigns && data.campaigns.length) ? data.campaigns : campaigns;
+        historyLog = (data.historyLog && data.historyLog.length) ? data.historyLog : historyLog;
+        contactBase = (data.contactBase && data.contactBase.length) ? data.contactBase : contactBase;
+        origenOptions = (data.origenOptions && data.origenOptions.length) ? data.origenOptions : origenOptions;
+        fuenteOptions = (data.fuenteOptions && data.fuenteOptions.length) ? data.fuenteOptions : fuenteOptions;
+        clientesVyT = (data.clientesVyT && data.clientesVyT.length) ? data.clientesVyT : clientesVyT;
+        analistas = (data.analistas && data.analistas.length) ? data.analistas : analistas;
+        temasPorEscuela = (data.temasPorEscuela && Object.keys(data.temasPorEscuela).length) ? data.temasPorEscuela : temasPorEscuela;
+        docentesDisponibles = (data.docentesDisponibles && data.docentesDisponibles.length) ? data.docentesDisponibles : docentesDisponibles;
+      } else {
+        throw new Error('HTTP ' + res.status);
+      }
+    }catch(e){
+      console.error('No se pudo cargar desde JSONbin, se usan los valores por defecto', e);
+      setSaveIndicator('error');
+      showToast('No se pudo conectar con el almacenamiento compartido. Mostrando datos locales de respaldo.');
+    }
+    renderAll();
+  }
+
+  function renderKpis(){
+    const camp = campaigns.find(c => c.id === selectedCampaign);
+    if (!camp){
+      document.getElementById('kpiRow').innerHTML = `<div class="kpi-card" style="grid-column:span 4;"><div class="kpi-label">Sin campañas todavía</div><div class="kpi-value" style="font-size:16px;">Crea tu primera campaña para ver estadísticas aquí</div></div>`;
+      return;
+    }
+    const totalContactos = camp.contactos.length;
+    const enEval = camp.contactos.filter(c => c.estado === 'evaluacion').length;
+    const cuposTomados = camp.contactos.filter(c => c.estado === 'matriculado').length;
+    const respondieron = camp.contactos.filter(c => c.estado !== 'enviado').length;
+    const tasa = totalContactos ? Math.round((respondieron/totalContactos)*100) : 0;
+    document.getElementById('kpiRow').innerHTML = `
+      <div class="kpi-card"><div class="kpi-label">Contactos en campaña</div><div class="kpi-value">${totalContactos}</div><div class="kpi-delta flat">${camp.title}</div></div>
+      <div class="kpi-card"><div class="kpi-label">En evaluación</div><div class="kpi-value">${enEval}</div><div class="kpi-delta up">Recordatorio activo c/5 días</div></div>
+      <div class="kpi-card"><div class="kpi-label">Cupos vendidos</div><div class="kpi-value">${cuposTomados} / ${camp.cupos}</div><div class="kpi-delta flat">${camp.cupos ? Math.round((cuposTomados/camp.cupos)*100) : 0}% de la meta</div></div>
+      <div class="kpi-card"><div class="kpi-label">Tasa de respuesta</div><div class="kpi-value">${tasa}%</div><div class="kpi-delta up">${respondieron} de ${totalContactos} respondieron</div></div>
+    `;
+  }
+
+  function renderPipeline(){
+    const camp = campaigns.find(c => c.id === selectedCampaign);
+    if (!camp){
+      document.getElementById('pipeline').innerHTML = `<p style="color:var(--ink-dim);font-size:13px;">Crea una campaña para ver su flujo de estados aquí.</p>`;
+      return;
+    }
+    const stages = ['enviado','evaluacion','sinrespuesta','rechazado','aceptado','matriculado','no_matriculado'];
+    const counts = {}; stages.forEach(s => counts[s] = camp.contactos.filter(c => c.estado === s).length);
+    document.getElementById('pipeline').innerHTML = stages.map((s,i) => `
+      <div class="pl-stage pl-${s}"><div class="n">${counts[s]}</div><div class="lbl">${badgeLabel[s]}</div>${s==='evaluacion' ? '<div class="pl-note">Recordatorio c/5 días</div>' : ''}</div>
+      ${i < stages.length-1 ? '<div class="pl-arrow">→</div>' : ''}
+    `).join('');
+  }
+
+  function renderResumenTabla(){
+    document.getElementById('campCountHint').textContent = campaigns.length + ' campañas registradas';
+    document.getElementById('resumenCampBody').innerHTML = campaigns.map(c => {
+      const cuposTomados = c.contactos.filter(x => x.estado === 'matriculado').length;
+      return `<tr><td class="company">${c.title}</td><td>${c.tipo}</td><td>${c.fechaInicio} → ${c.fechaFin}</td><td>${cuposTomados} / ${c.cupos}</td><td>${c.contactos.length}</td></tr>`;
+    }).join('');
+  }
+
+  function renderCampGrid(){
+    document.getElementById('campGrid').innerHTML = campaigns.map(c => {
+      const cuposTomados = c.contactos.filter(x => x.estado === 'matriculado').length;
+      return `
+      <div class="camp-card ${c.id === selectedCampaign ? 'selected' : ''}" data-camp="${c.id}" style="position:relative;">
+        <button class="icon-btn" title="Eliminar campaña" onclick="eliminarCampana('${c.id}', event)" style="position:absolute;top:10px;right:10px;">🗑</button>
+        <div class="camp-tipo">${tipoCorto(c.tipo)}</div>
+        <div class="camp-title" style="padding-right:24px;">${c.title}</div>
+        <div class="camp-date">📅 ${c.fechaInicio} → ${c.fechaFin}</div>
+        ${c.archivoNombre ? `<div style="font-size:10.5px;color:var(--ink-dim);margin-bottom:6px;">📎 ${c.archivoNombre}</div>` : ''}
+        <div class="camp-bar-track"><div class="camp-bar-fill" style="width:${c.cupos ? Math.min(100,(cuposTomados/c.cupos)*100) : 0}%"></div></div>
+        <div class="camp-meta"><span>Cupos <b>${cuposTomados}/${c.cupos}</b></span><span>${c.contactos.length} contactos</span></div>
+      </div>`;
+    }).join('');
+    document.querySelectorAll('.camp-card').forEach(card => {
+      card.addEventListener('click', () => { selectedCampaign = card.dataset.camp; selectedStatus = 'todos'; expandedIdx = null; seguimientoSeleccionados = new Set(); renderAll(); });
+    });
+  }
+
+  // ===== Canales disponibles según los datos reales del contacto =====
+  // ===== Recordatorio dinámico para el Analista de Educación (cada 5 días desde el envío inicial) =====
+  function calcularRecordatorio(c){
+    if (c.estado !== 'evaluacion') return '—';
+    const primera = c.rondas && c.rondas[0] ? c.rondas[0].fecha : null;
+    if (!primera || !primera.includes('/')){
+      return `<span class="reminder" title="No se puede calcular con precisión: falta la fecha del primer contacto">⏱ c/5 días para el Analista de Educación (fecha de envío no registrada)</span>`;
+    }
+    const [d,m,y] = primera.split('/');
+    const fechaEnvio = new Date(Number(y), Number(m)-1, Number(d));
+    const hoy = new Date();
+    const diffDias = Math.floor((hoy - fechaEnvio) / (1000*60*60*24));
+    if (diffDias < 0){
+      return `<span class="reminder">⏱ Envío programado a futuro</span>`;
+    }
+    const esHoy = diffDias > 0 && diffDias % 5 === 0;
+    const restante = esHoy ? 0 : 5 - (diffDias % 5);
+    return `<span class="reminder" title="Corre desde el primer envío: ${primera} (hace ${diffDias} día${diffDias===1?'':'s'})">⏱ ${esHoy ? 'Recordatorio HOY' : 'Próximo en ' + restante + ' día' + (restante===1?'':'s')} · Analista de Educación</span>`;
+  }
+
+  function canalesDisponibles(c, valorActual){
+    let opts = [];
+    if (c.telefono && c.telefono !== '—'){ opts.push('Llamada'); opts.push('WhatsApp'); }
+    if (c.correo && c.correo !== '—'){ opts.push('Correo'); }
+    if (opts.length === 0) opts = ['Llamada','WhatsApp','Correo'];
+    if (valorActual && !opts.includes(valorActual)) opts.push(valorActual);
+    return opts;
+  }
+
+  function fechaToInputValue(fecha){
+    if (!fecha || !fecha.includes('/')) return '';
+    const [d,m,y] = fecha.split('/');
+    if (!d || !m || !y) return '';
+    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+  }
+  function inputValueToFecha(v){
+    if (!v) return '— (no registrada)';
+    const [y,m,d] = v.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function rondaDetailTable(c, i){
+    const labels = ['Primer contacto','Segundo contacto','Tercer contacto','Cuarto contacto','Quinto contacto'];
+    return `<table class="rondas-table"><thead><tr><th>Ronda</th><th>Canal</th><th>Fecha</th></tr></thead><tbody>
+      ${labels.map((l,n) => {
+        const ronda = c.rondas[n];
+        const canalActual = ronda ? ronda.canal : '';
+        const opts = canalesDisponibles(c, canalActual);
+        return `<tr>
+          <td>${l}</td>
+          <td><select id="ronda_canal_${i}_${n+1}"><option value="">— Sin registrar —</option>${opts.map(o => `<option ${o===canalActual?'selected':''}>${o}</option>`).join('')}</select></td>
+          <td><input type="date" id="ronda_fecha_${i}_${n+1}" value="${fechaToInputValue(ronda ? ronda.fecha : '')}"></td>
+        </tr>`;
+      }).join('')}
+    </tbody></table>
+    <div style="margin-top:10px;display:flex;justify-content:flex-end;"><button class="btn btn-ghost" onclick="guardarRondas(${i})">Guardar rondas</button></div>`;
+  }
+
+  function guardarRondas(i){
+    const camp = campaigns.find(x => x.id === selectedCampaign);
+    const c = camp.contactos[i];
+    const nuevas = [];
+    for (let n = 1; n <= 5; n++){
+      const canalEl = document.getElementById(`ronda_canal_${i}_${n}`);
+      const fechaEl = document.getElementById(`ronda_fecha_${i}_${n}`);
+      if (canalEl && canalEl.value){
+        nuevas.push({ n, canal: canalEl.value, fecha: fechaEl.value ? inputValueToFecha(fechaEl.value) : '— (no registrada)' });
+      }
+    }
+    const huboCambio = JSON.stringify(nuevas) !== JSON.stringify(c.rondas);
+    c.rondas = nuevas;
+    if (huboCambio) addHistoryEntry(selectedCampaign, c.nombre, 'Rondas de contacto', '—', `${nuevas.length} ronda(s) registradas`);
+    persist();
+    renderAll();
+    showToast('Rondas de contacto actualizadas.');
+  }
+
+  function cambiarCanalDisponible(i, val){
+    const camp = campaigns.find(x => x.id === selectedCampaign);
+    const c = camp.contactos[i];
+    if (c.rondas.length === 0){
+      c.rondas.push({ n:1, canal: val, fecha: '— (no registrada)' });
+      addHistoryEntry(selectedCampaign, c.nombre, 'Primer contacto registrado', '—', val);
+    } else {
+      const old = c.rondas[c.rondas.length-1].canal;
+      c.rondas[c.rondas.length-1].canal = val;
+      addHistoryEntry(selectedCampaign, c.nombre, 'Canal del último contacto', old, val);
+    }
+    persist();
+    renderAll();
+  }
+
+  // ===== Selección múltiple en Campañas y Seguimiento =====
+  let seguimientoSeleccionados = new Set();
+
+  function renderBulkBar(){
+    const bar = document.getElementById('seguimientoBulkBar');
+    if (!bar) return;
+    bar.style.display = seguimientoSeleccionados.size > 0 ? 'flex' : 'none';
+    document.getElementById('seguimientoSelCount').textContent = seguimientoSeleccionados.size;
+  }
+
+  function toggleSeguimientoCheck(key, checked){
+    if (checked) seguimientoSeleccionados.add(key); else seguimientoSeleccionados.delete(key);
+    renderBulkBar();
+  }
+
+  function seleccionarTodoSeguimiento(todos){
+    const camp = campaigns.find(c => c.id === selectedCampaign);
+    if (!todos){ seguimientoSeleccionados = new Set(); }
+    else {
+      const filtered = camp.contactos.filter(c => selectedStatus === 'todos' || c.estado === selectedStatus);
+      seguimientoSeleccionados = new Set(filtered.map(c => c.nombre + '|' + c.empresa));
+    }
+    renderContactos();
+  }
+
+  function marcarSeleccionadosEstado(nuevoEstado){
+    const camp = campaigns.find(c => c.id === selectedCampaign);
+    const afectados = camp.contactos.filter(c => seguimientoSeleccionados.has(c.nombre + '|' + c.empresa));
+    if (afectados.length === 0) return;
+    showConfirm(`¿Marcar ${afectados.length} contacto(s) como "${badgeLabel[nuevoEstado]}"?`, () => {
+      afectados.forEach(c => {
+        if (c.estado !== nuevoEstado){
+          addHistoryEntry(selectedCampaign, c.nombre, 'Estado (acción masiva)', badgeLabel[c.estado], badgeLabel[nuevoEstado]);
+          c.estado = nuevoEstado;
+          c.matriculado = nuevoEstado === 'matriculado' ? 'SI' : c.matriculado;
+        }
+      });
+      seguimientoSeleccionados = new Set();
+      persist();
+      renderAll();
+      showToast(`${afectados.length} contacto(s) actualizados.`);
+    }, 'Marcar');
+  }
+
+  function renderContactos(){
+    const camp = campaigns.find(c => c.id === selectedCampaign);
+    if (!camp){
+      document.getElementById('contactosTitle').textContent = 'Contactos';
+      document.getElementById('contactosBody').innerHTML = `<tr><td colspan="11" style="text-align:center;color:var(--ink-dim);padding:24px;">No hay ninguna campaña creada todavía. Ve a "Nueva campaña" para crear la primera.</td></tr>`;
+      const bar = document.getElementById('seguimientoBulkBar');
+      if (bar) bar.style.display = 'none';
+      return;
+    }
+    document.getElementById('contactosTitle').textContent = 'Contactos · ' + camp.title;
+    const body = document.getElementById('contactosBody');
+    const filtered = camp.contactos.map((c,i) => ({c,i})).filter(({c}) => selectedStatus === 'todos' || c.estado === selectedStatus);
+    renderBulkBar();
+    if (filtered.length === 0){
+      body.innerHTML = `<tr><td colspan="11" style="text-align:center;color:var(--ink-dim);padding:24px;">Sin contactos registrados todavía para esta campaña / filtro.</td></tr>`;
+      return;
+    }
+    body.innerHTML = filtered.map(({c,i}) => {
+      const key = c.nombre + '|' + c.empresa;
+      const ultimoCanal = c.rondas.length ? c.rondas[c.rondas.length-1].canal : '';
+      const opcionesCanal = canalesDisponibles(c, ultimoCanal);
+      const otrasCampanas = participacionesPrevias(c.nombre, c.empresa).filter(p => p.campana !== camp.title);
+      const rows = [`
+      <tr>
+        <td><input type="checkbox" ${seguimientoSeleccionados.has(key)?'checked':''} onchange="toggleSeguimientoCheck('${key.replace(/'/g,"\\'")}', this.checked)"></td>
+        <td><button class="icon-btn" onclick="toggleExpand(${i})">${expandedIdx===i?'︿':'⌄'}</button></td>
+        <td><span class="person-name">${c.nombre}</span><span class="person-cargo">${c.cargo}</span></td>
+        <td>${c.empresa}<br><span style="font-size:10.5px;color:var(--ink-dim)">${c.cliente==='Sí'?'Cliente':'No cliente'}</span></td>
+        <td><span class="badge badge-${c.estado}">${badgeLabel[c.estado]}</span></td>
+        <td><div class="contact-dots">${[1,2,3,4,5].map(n => `<div class="cdot ${n<=c.rondas.length?'done':(n===c.rondas.length+1?'next':'')}"></div>`).join('')}</div></td>
+        <td><select onchange="cambiarCanalDisponible(${i}, this.value)" style="font-size:11.5px;">${opcionesCanal.map(o => `<option ${o===ultimoCanal?'selected':''}>${o}</option>`).join('')}</select></td>
+        <td>${calcularRecordatorio(c)}</td>
+        <td>${c.cupos}</td>
+        <td>${otrasCampanas.length > 0 ? `<span class="badge badge-origen" style="cursor:pointer;" onclick="verHistorialContacto('${c.nombre.replace(/'/g,"\\'")}','${c.empresa.replace(/'/g,"\\'")}')">🔁 ${otrasCampanas.length}</span>` : '<span style="color:var(--ink-dim);font-size:11px;">—</span>'}</td>
+        <td><span class="obs">${c.obs}</span></td>
+      </tr>`];
+      if (expandedIdx === i){
+        const usados = new Set(c.rondas.map(r => r.canal));
+        const disponibles = canalesDisponibles(c);
+        const sinProbar = disponibles.filter(d => !usados.has(d));
+        const sugerirOtroCanal = (c.estado === 'sinrespuesta' || c.estado === 'enviado') && sinProbar.length > 0 && c.rondas.length > 0;
+        rows.push(`<tr class="detail-row"><td colspan="11">
+          <div class="detail-grid">
+            <div class="detail-item"><div class="k">Origen</div><div class="v"><span class="badge badge-origen">${c.origen}</span></div></div>
+            <div class="detail-item"><div class="k">Fuente</div><div class="v">${c.fuente}</div></div>
+            <div class="detail-item"><div class="k">Semana</div><div class="v">${c.semana}</div></div>
+            <div class="detail-item"><div class="k">Fecha de ingreso</div><div class="v">${c.fecha}</div></div>
+            <div class="detail-item"><div class="k">Origen de base</div><div class="v">${c.origenDeBase}</div></div>
+            <div class="detail-item"><div class="k">Cargo homologado VyT</div><div class="v">${c.cargoHomologado}</div></div>
+            <div class="detail-item"><div class="k">Teléfono</div><div class="v">${c.telefono} ${c.telefono2!=='—'?'/ '+c.telefono2:''}</div></div>
+            <div class="detail-item"><div class="k">Correo</div><div class="v">${c.correo}</div></div>
+            ${otrasCampanas.length > 0 ? `<div class="detail-item" style="grid-column:span 4;"><div class="k">Ya participó en otras campañas</div><div class="v">${otrasCampanas.map(p => `${p.campana} (${badgeLabel[p.estado]})`).join(' · ')}</div></div>` : ''}
+            ${sugerirOtroCanal ? `<div class="detail-item" style="grid-column:span 4;"><div class="banner" style="margin:0;">💡 <div>Este contacto no responde por <b>${ultimoCanal}</b>, pero tiene otro(s) canal(es) sin probar: <b>${sinProbar.join(', ')}</b>. Vale la pena intentar por ahí antes de darlo por perdido.</div></div></div>` : ''}
+            <div class="detail-item" style="grid-column:span 4;"><div class="k">Traza de respuestas</div><div class="v">${c.respuestaAnterior} → ${c.respuesta1} → ${c.respuesta2} → <b>${c.respuestaFinal}</b></div></div>
+            <div class="detail-item" style="grid-column:span 4;">${rondaDetailTable(c, i)}</div>
+            <div class="detail-item" style="grid-column:span 4;border-top:1px solid var(--border);padding-top:16px;">
+              <div class="k" style="margin-bottom:10px;">Actualizar seguimiento</div>
+              <div class="form-grid">
+                <div class="field">
+                  <label>Estado</label>
+                  <select id="upd_estado_${i}">${Object.keys(badgeLabel).map(k => `<option value="${k}" ${k===c.estado?'selected':''}>${badgeLabel[k]}</option>`).join('')}</select>
+                </div>
+                <div class="field">
+                  <label>Matriculado</label>
+                  <select id="upd_matriculado_${i}"><option value="NO" ${c.matriculado!=='SI'?'selected':''}>NO</option><option value="SI" ${c.matriculado==='SI'?'selected':''}>SI</option></select>
+                </div>
+                <div class="field">
+                  <label>Cupos confirmados</label>
+                  <input type="number" id="upd_cupos_${i}" value="${c.cupos}">
+                </div>
+                <div class="field full">
+                  <label>Agregar observación (se suma a las anteriores, no las borra)</label>
+                  <input type="text" id="upd_obs_${i}" placeholder="Ej. Dijo que lo está validando con su jefe">
+                </div>
+              </div>
+              <div style="margin-top:12px;display:flex;justify-content:flex-end;">
+                <button class="btn btn-primary" onclick="actualizarSeguimiento(${i})">Guardar actualización</button>
+              </div>
+            </div>
+          </div>
+        </td></tr>`);
+      }
+      return rows.join('');
+    }).join('');
+  }
+
+  function toggleExpand(i){ expandedIdx = expandedIdx === i ? null : i; renderContactos(); }
+
+  function actualizarSeguimiento(i){
+    const camp = campaigns.find(c => c.id === selectedCampaign);
+    const c = camp.contactos[i];
+    const nuevoEstado = document.getElementById('upd_estado_' + i).value;
+    const nuevoMatriculado = document.getElementById('upd_matriculado_' + i).value;
+    const nuevosCupos = document.getElementById('upd_cupos_' + i).value;
+    const nuevaObs = document.getElementById('upd_obs_' + i).value.trim();
+
+    if (nuevoEstado !== c.estado){
+      addHistoryEntry(selectedCampaign, c.nombre, 'Estado', badgeLabel[c.estado], badgeLabel[nuevoEstado]);
+      c.estado = nuevoEstado;
+    }
+    if (nuevoMatriculado !== (c.matriculado || 'NO')){
+      addHistoryEntry(selectedCampaign, c.nombre, 'Matriculado', c.matriculado || 'NO', nuevoMatriculado);
+      c.matriculado = nuevoMatriculado;
+    }
+    if (Number(nuevosCupos) !== Number(c.cupos)){
+      addHistoryEntry(selectedCampaign, c.nombre, 'Cupos', c.cupos, nuevosCupos);
+      c.cupos = Number(nuevosCupos) || 0;
+    }
+    if (nuevaObs){
+      const hoy = new Date();
+      const fechaTxt = String(hoy.getDate()).padStart(2,'0')+'/'+String(hoy.getMonth()+1).padStart(2,'0')+'/'+hoy.getFullYear();
+      c.obs = c.obs && c.obs !== 'Recién enviado, sin respuesta todavía' ? `${c.obs} / [${fechaTxt}] ${nuevaObs}` : `[${fechaTxt}] ${nuevaObs}`;
+      addHistoryEntry(selectedCampaign, c.nombre, 'Observación agregada', '—', nuevaObs);
+    }
+    persist();
+    renderAll();
+    showToast('Seguimiento actualizado.');
+  }
+
+  function addHistoryEntry(campId, entidad, campo, oldVal, newVal){
+    const camp = campaigns.find(c => c.id === campId);
+    const now = new Date();
+    const fecha = String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear()+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    historyLog.unshift({ fecha, usuario:'Edu Sánchez', campId, campLabel: camp ? camp.tipo : campId, texto: `${entidad}: ${campo} cambió de "${oldVal}" → "${newVal}"` });
+  }
+
+  function renderHistorial(){
+    const body = document.getElementById('historialBody');
+    if (!body) return;
+    const filtered = histCampFilter === 'todos' ? historyLog : historyLog.filter(h => h.campId === histCampFilter);
+    body.innerHTML = filtered.length === 0
+      ? `<tr><td colspan="4" style="text-align:center;color:var(--ink-dim);padding:24px;">Sin movimientos registrados.</td></tr>`
+      : filtered.map(h => `<tr><td style="color:var(--ink-dim);font-family:'IBM Plex Mono',monospace;font-size:11px;">${h.fecha}</td><td>${h.usuario}</td><td><span class="badge badge-enviado">${h.campLabel}</span></td><td>${h.texto}</td></tr>`).join('');
+  }
+
+  // ===== PANEL BI =====
+  let chartCampanasInst = null, chartEmpresasInst = null, chartEstadosInst = null;
+  let biModoEjemplo = false;
+  const estadoColors = { enviado:'#1D5DA8', evaluacion:'#B8790A', sinrespuesta:'#5A6472', rechazado:'#B0233B', aceptado:'#1D5DA8', matriculado:'#177A4C', no_matriculado:'#8A94A6' };
+
+  function toggleBIDemo(){
+    biModoEjemplo = !biModoEjemplo;
+    document.getElementById('biDemoBanner').style.display = biModoEjemplo ? 'flex' : 'none';
+    document.getElementById('btnToggleBIDemo').textContent = biModoEjemplo ? '← Volver a mis datos reales' : '👁 Ver con datos de ejemplo';
+    renderBI();
+  }
+
+  function getDemoBIData(){
+    const campStats = [
+      { id:'demo1', title:'Bootcamp Laboral Intensivo', tipo:'Escuela de Relaciones Laborales Aplicadas', totalContactos:78, matriculadosCount:45, cuposMatriculados:45 },
+      { id:'demo2', title:'ABC Laboral para no abogados', tipo:'Escuela de Relaciones Laborales Aplicadas', totalContactos:60, matriculadosCount:32, cuposMatriculados:32 },
+      { id:'demo3', title:'Curso de SST para Supervisores de Planta', tipo:'Escuela de Relaciones Laborales Aplicadas', totalContactos:24, matriculadosCount:18, cuposMatriculados:18 },
+      { id:'demo4', title:'Programa de Liderazgo para Gerentes del Sector Minero', tipo:'Escuela de Liderazgo y Habilidades Laborales', totalContactos:19, matriculadosCount:12, cuposMatriculados:12 },
+      { id:'demo5', title:'Diplomado de Gestión de Sindicatos', tipo:'Escuela de Gestión de Conflictos y Negociación', totalContactos:22, matriculadosCount:9, cuposMatriculados:9 },
+      { id:'demo6', title:'Taller de Planillas para Contadores', tipo:'Escuela de Relaciones Laborales Aplicadas', totalContactos:15, matriculadosCount:5, cuposMatriculados:5 },
+    ];
+    const empresaStats = [
+      { empresa:'Alicorp', contactos:15, matriculados:10, cupos:10 },
+      { empresa:'Backus', contactos:12, matriculados:8, cupos:8 },
+      { empresa:'Southern Perú', contactos:10, matriculados:6, cupos:6 },
+      { empresa:'Minera Yanacocha', contactos:9, matriculados:5, cupos:5 },
+      { empresa:'Prosegur', contactos:8, matriculados:3, cupos:3 },
+      { empresa:'Antamina', contactos:7, matriculados:4, cupos:4 },
+      { empresa:'Ferreycorp', contactos:6, matriculados:2, cupos:2 },
+      { empresa:'Cerro Verde', contactos:5, matriculados:3, cupos:3 },
+    ];
+    const contactosRecurrentes = [
+      { nombre:'Grethel De la Cruz Garcia', empresa:'Vinatea y Toyama', apariciones:3, campanas:['Bootcamp Laboral Intensivo','Curso de SST para Supervisores de Planta','Diplomado de Gestión de Sindicatos'] },
+      { nombre:'Jorge Huamán Ríos', empresa:'Minera Yanacocha', apariciones:2, campanas:['Bootcamp Laboral Intensivo','Programa de Liderazgo para Gerentes del Sector Minero'] },
+      { nombre:'Mariana Ponce Del Valle', empresa:'Antamina', apariciones:2, campanas:['ABC Laboral para no abogados','Diplomado de Gestión de Sindicatos'] },
+      { nombre:'Fernando Rojas Guzmán', empresa:'Alicorp', apariciones:2, campanas:['Curso de SST para Supervisores de Planta','Bootcamp Laboral Intensivo'] },
+    ];
+    const estadoMap = { enviado:22, evaluacion:15, sinrespuesta:11, rechazado:6, aceptado:9, matriculado:121, no_matriculado:14 };
+    const totalContactosGlobal = Object.values(estadoMap).reduce((a,b) => a+b, 0);
+    return { campStats, empresaStats, contactosRecurrentes, estadoMap, totalContactosGlobal };
+  }
+
+  function renderBI(){
+    if (!document.getElementById('biKpiRow') || typeof Chart === 'undefined') return;
+
+    let campStats, empresaStats, contactosRecurrentes, estadoMap, totalContactosGlobal;
+
+    if (biModoEjemplo){
+      ({ campStats, empresaStats, contactosRecurrentes, estadoMap, totalContactosGlobal } = getDemoBIData());
+    } else {
+      // Agregados por campaña
+      campStats = campaigns.map(c => {
+        const matriculados = c.contactos.filter(x => x.estado === 'matriculado');
+        const cuposMatriculados = matriculados.length;
+        return { id: c.id, title: c.title, tipo: c.tipo, totalContactos: c.contactos.length, matriculadosCount: matriculados.length, cuposMatriculados };
+      }).sort((a,b) => b.cuposMatriculados - a.cuposMatriculados);
+
+      // Agregados por empresa (across todas las campañas)
+      const empresaMap = {};
+      campaigns.forEach(c => c.contactos.forEach(x => {
+        if (!empresaMap[x.empresa]) empresaMap[x.empresa] = { empresa: x.empresa, contactos: 0, matriculados: 0, cupos: 0 };
+        empresaMap[x.empresa].contactos++;
+        if (x.estado === 'matriculado'){ empresaMap[x.empresa].matriculados++; empresaMap[x.empresa].cupos++; }
+      }));
+      empresaStats = Object.values(empresaMap).sort((a,b) => b.contactos - a.contactos).slice(0,8);
+
+      // Contactos recurrentes (mismo nombre+empresa en 2+ campañas)
+      const contactoMap = {};
+      campaigns.forEach(c => c.contactos.forEach(x => {
+        const key = x.nombre + '|' + x.empresa;
+        if (!contactoMap[key]) contactoMap[key] = { nombre: x.nombre, empresa: x.empresa, apariciones: 0, campanas: [] };
+        contactoMap[key].apariciones++;
+        contactoMap[key].campanas.push(c.title);
+      }));
+      contactosRecurrentes = Object.values(contactoMap).filter(x => x.apariciones > 1).sort((a,b) => b.apariciones - a.apariciones);
+
+      // Distribución de estados global
+      estadoMap = {};
+      Object.keys(badgeLabel).forEach(k => estadoMap[k] = 0);
+      campaigns.forEach(c => c.contactos.forEach(x => { estadoMap[x.estado] = (estadoMap[x.estado]||0) + 1; }));
+      totalContactosGlobal = campaigns.reduce((s,c) => s + c.contactos.length, 0);
+    }
+
+    // KPIs
+    const totalMatriculados = campStats.reduce((s,c) => s + c.matriculadosCount, 0);
+    const empresaTop = empresaStats[0];
+    const contactoTop = contactosRecurrentes[0];
+    document.getElementById('biKpiRow').innerHTML = `
+      <div class="kpi-card"><div class="kpi-label">Campañas registradas</div><div class="kpi-value">${campaigns.length}</div><div class="kpi-delta flat">${totalContactosGlobal} contactos en total</div></div>
+      <div class="kpi-card"><div class="kpi-label">Matriculados (todas las campañas)</div><div class="kpi-value">${totalMatriculados}</div><div class="kpi-delta up">${totalContactosGlobal ? Math.round((totalMatriculados/totalContactosGlobal)*100) : 0}% de conversión</div></div>
+      <div class="kpi-card"><div class="kpi-label">Empresa más participativa</div><div class="kpi-value" style="font-size:16px;">${empresaTop ? empresaTop.empresa : '—'}</div><div class="kpi-delta flat">${empresaTop ? empresaTop.contactos + ' contacto(s)' : 'Sin datos aún'}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Contacto más recurrente</div><div class="kpi-value" style="font-size:16px;">${contactoTop ? contactoTop.nombre.split(' ').slice(0,2).join(' ') : '—'}</div><div class="kpi-delta flat">${contactoTop ? 'En ' + contactoTop.apariciones + ' campañas' : 'Ninguno repetido aún'}</div></div>
+    `;
+
+    const navy = '#042433', red = '#E6223D';
+
+    // ----- Gráfico: Campañas con más matriculados (barras horizontales, clic navega) -----
+    document.getElementById('biCampanasEmpty').innerHTML = campStats.length === 0 ? `<p style="color:var(--ink-dim);font-size:13px;margin-top:10px;">Sin campañas todavía.</p>` : '';
+    if (chartCampanasInst) chartCampanasInst.destroy();
+    if (campStats.length > 0){
+      chartCampanasInst = new Chart(document.getElementById('chartCampanas'), {
+        type: 'bar',
+        data: {
+          labels: campStats.map(c => c.title.length > 28 ? c.title.slice(0,28)+'…' : c.title),
+          datasets: [{
+            label: 'Cupos matriculados',
+            data: campStats.map(c => c.cuposMatriculados),
+            backgroundColor: campStats.map((c,i) => i===0 ? red : navy),
+            borderRadius: 6,
+            maxBarThickness: 28
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true, maintainAspectRatio: false,
+          onClick: (evt, els) => { if (els.length){ if (biModoEjemplo){ showToast('Esto es un dato de ejemplo — no corresponde a una campaña real.'); return; } const idx = els[0].index; selectedCampaign = campStats[idx].id; switchView('seguimiento'); renderAll(); } },
+          onHover: (evt, els) => { evt.native.target.style.cursor = els.length ? 'pointer' : 'default'; },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (ctx) => {
+              const c = campStats[ctx.dataIndex];
+              return [`${c.cuposMatriculados} cupos matriculados`, `${c.matriculadosCount} de ${c.totalContactos} contactos`, 'Clic para ver seguimiento →'];
+            } } }
+          },
+          scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+    }
+
+    // ----- Gráfico: Empresas con más participación (barras, clic filtra en Base de Contactos) -----
+    document.getElementById('biEmpresasEmpty').innerHTML = empresaStats.length === 0 ? `<p style="color:var(--ink-dim);font-size:13px;margin-top:10px;">Sin empresas todavía.</p>` : '';
+    if (chartEmpresasInst) chartEmpresasInst.destroy();
+    if (empresaStats.length > 0){
+      chartEmpresasInst = new Chart(document.getElementById('chartEmpresas'), {
+        type: 'bar',
+        data: {
+          labels: empresaStats.map(e => e.empresa),
+          datasets: [
+            { label: 'Enviados', data: empresaStats.map(e => e.contactos - e.matriculados), backgroundColor: '#E9F1FB', borderRadius: 4 },
+            { label: 'Matriculados', data: empresaStats.map(e => e.matriculados), backgroundColor: navy, borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          onClick: (evt, els) => { if (els.length){ if (biModoEjemplo){ showToast('Esto es un dato de ejemplo — no corresponde a una empresa real en tu base.'); return; } const idx = els[0].index; switchView('publico'); document.getElementById('buscarBase').value = empresaStats[idx].empresa; renderBaseTable(); } },
+          onHover: (evt, els) => { evt.native.target.style.cursor = els.length ? 'pointer' : 'default'; },
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } },
+          scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } }
+        }
+      });
+    }
+
+    // ----- Gráfico: Distribución de estados (donut) -----
+    const estadoKeys = Object.keys(badgeLabel).filter(k => estadoMap[k] > 0);
+    if (chartEstadosInst) chartEstadosInst.destroy();
+    if (estadoKeys.length > 0){
+      chartEstadosInst = new Chart(document.getElementById('chartEstados'), {
+        type: 'doughnut',
+        data: {
+          labels: estadoKeys.map(k => badgeLabel[k]),
+          datasets: [{ data: estadoKeys.map(k => estadoMap[k]), backgroundColor: estadoKeys.map(k => estadoColors[k]), borderWidth: 2, borderColor: '#fff' }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } }
+        }
+      });
+    } else {
+      const ctx = document.getElementById('chartEstados');
+      if (ctx) ctx.parentElement.insertAdjacentHTML('beforeend', '');
+    }
+
+    // Contactos recurrentes (tabla, clic abre historial)
+    document.getElementById('biContactos').innerHTML = contactosRecurrentes.length === 0
+      ? `<p style="color:var(--ink-dim);font-size:13px;">Todavía ningún contacto se repite en más de una campaña.</p>`
+      : `<table><thead><tr><th>Apellidos y Nombres</th><th>Empresa</th><th># Campañas</th><th>Campañas</th></tr></thead><tbody>` +
+        contactosRecurrentes.map(c => `<tr style="cursor:pointer;" onclick="verHistorialContacto('${c.nombre.replace(/'/g,"\\'")}','${c.empresa.replace(/'/g,"\\'")}')"><td class="person-name">${c.nombre}</td><td>${c.empresa}</td><td><span class="badge badge-origen">${c.apariciones}</span></td><td style="font-size:11.5px;color:var(--ink-dim);">${c.campanas.join(', ')}</td></tr>`).join('') +
+        `</tbody></table>`;
+  }
+
+  function renderAll(){
+    renderKpis(); renderPipeline(); renderResumenTabla();
+    renderCampGrid(); renderContactos(); renderHistorial();
+    populateFilterOptions(); renderBaseTable();
+    refreshOptionLists(); renderAnalistasChips(); renderDocentesChips();
+    renderAllMultiSelects();
+    renderBI();
+    if (!document.getElementById('tipoOferta').value) updateTemaOptions();
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadState().then(() => updateSegment());
+    document.getElementById('statusChips').querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.getElementById('statusChips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active'); selectedStatus = chip.dataset.status; expandedIdx = null; seguimientoSeleccionados = new Set(); renderContactos();
+      });
+    });
+    document.getElementById('histCampFilter').querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.getElementById('histCampFilter').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active'); histCampFilter = chip.dataset.camp; renderHistorial();
+      });
+    });
+  });
+
+  const navItems = document.querySelectorAll('.nav-item');
+  const views = { resumen:'v-resumen', campana:'v-campana', publico:'v-publico', seguimiento:'v-seguimiento', historial:'v-historial', bi:'v-bi', config:'v-config' };
+  const titlesTop = {
+    resumen:["Resumen general","Estado de campañas de educación ejecutiva"],
+    campana:["Nueva campaña","Información general de la oferta"],
+    publico:["Base de contactos","Gestión y segmentación de contactos"],
+    seguimiento:["Campañas y seguimiento","Todas las campañas, contactos y trazabilidad"],
+    historial:["Historial","Trazabilidad completa de cambios"],
+    bi:["Panel BI","Analítica de campañas, empresas y contactos"],
+    config:["Configuración","Ajustes generales y mantenimiento de datos"]
+  };
+  function switchView(key){
+    navItems.forEach(i => i.classList.remove('active'));
+    const navItem = document.querySelector(`.nav-item[data-view="${key}"]`);
+    if (navItem) navItem.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(views[key]).classList.add('active');
+    document.getElementById('topTitle').textContent = titlesTop[key][0];
+    document.getElementById('topSub').textContent = titlesTop[key][1];
+  }
+  navItems.forEach(item => {
+    item.addEventListener('click', () => switchView(item.dataset.view));
+  });
+  const titleInput = document.getElementById('titlePreview');
+  if (titleInput) titleInput.addEventListener('input', () => { tituloEditadoManualmente = true; });
+</script>
+
+</body>
+</html>
