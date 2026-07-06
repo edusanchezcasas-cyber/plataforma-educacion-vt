@@ -2153,14 +2153,12 @@
   function agregarContactoAEstaCampana(idx){
     const camp = campaigns.find(c => c.id === selectedCampaign);
     const c = contactBase[idx];
-    const hoy = new Date();
-    const fecha = String(hoy.getDate()).padStart(2,'0')+'/'+String(hoy.getMonth()+1).padStart(2,'0')+'/'+hoy.getFullYear();
     camp.contactos.push({
       nombre:c.nombre, cargo:c.cargo, cargoHomologado:c.cargoHomologado, empresa:c.empresa, cliente: c.cliente==='SI'?'Sí':'No', sector:c.sector || '—',
       origen:c.origen, fuente:c.fuente, semana:c.semana, fecha:c.fecha, origenDeBase:c.origenDeBase || '—', telefono:c.telefono, telefono2:c.telefono2 || '—',
       correo:c.correo, correo2:c.correo2 || '—', respuestaAnterior:'—', respuesta1:'—', respuesta2:'—', respuestaFinal:'—',
-      cupos:0, estado:'enviado', matriculado:'NO', obs:'Recién agregado, sin respuesta todavía',
-      rondas:[{ n:1, canal: canalesDisponibles(c)[0], fecha }]
+      cupos:0, estado:'enviado', matriculado:'NO', obs:'Agregado a la campaña, aún sin contactar',
+      rondas:[]
     });
     addHistoryEntry(selectedCampaign, c.nombre, 'Agregado a la campaña', '—', camp.title);
     persist();
