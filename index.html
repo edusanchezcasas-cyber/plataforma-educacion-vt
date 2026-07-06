@@ -207,6 +207,7 @@
   .save-indicator .dot{width:7px;height:7px;border-radius:50%;background:var(--green);}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 <div class="hub-hero">
@@ -266,10 +267,6 @@
           <div class="nav-sub-item" data-view="historial">🕐 Historial</div>
         </div>
       </div>
-      <div class="nav-item" data-view="historial">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3.5 3.5"/></svg>
-        Historial
-      </div>
       <div class="nav-item" data-view="bi">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6"/><rect x="12" y="8" width="3" height="10"/><rect x="17" y="5" width="3" height="13"/></svg>
         Panel BI
@@ -302,11 +299,15 @@
       <div class="view active" id="v-resumen">
         <div class="eyebrow">Panel general</div>
         <h1 class="section-title">Campañas de educación ejecutiva</h1>
-        <p class="section-desc">Vista consolidada de contactos por campaña, desde el envío hasta la matrícula.</p>
+        <p class="section-desc">Cómo va todo, y qué necesitas atender hoy — across todas las campañas activas.</p>
         <div class="kpi-row" id="kpiRow"></div>
         <div class="card">
-          <div class="card-head"><h3>Flujo de estados · Curso de SST</h3><div class="hint">Campaña activa</div></div>
+          <div class="card-head"><h3>Flujo de estados combinado</h3><div class="hint">Suma de todas las campañas activas</div></div>
           <div class="pipeline" id="pipeline"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Últimas campañas</h3><div class="hint">Las 3 más recientes — clic para ir a su seguimiento</div></div>
+          <div id="ultimasCampanas" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;"></div>
         </div>
         <div class="card">
           <div class="card-head"><h3>Campañas activas</h3><div class="hint" id="campCountHint"></div></div>
@@ -401,7 +402,7 @@
         </div>
         <div class="card" style="display:flex;justify-content:flex-end;gap:10px;">
           <button type="button" class="btn btn-ghost" onclick="descartarCampana()">Descartar</button>
-          <button type="button" class="btn btn-primary" onclick="crearCampana()">Crear campaña y continuar →</button>
+          <button type="button" class="btn btn-primary" id="btnCrearCampana" onclick="crearCampana()">Crear campaña y continuar →</button>
         </div>
       </div>
 
@@ -514,15 +515,17 @@
         <div id="envioCampanaWrap" style="display:none;">
           <div class="card">
             <div class="card-head"><h3>Campaña destino</h3><div class="hint">A qué campaña se agregan los contactos filtrados</div></div>
-            <div class="field">
-              <select id="filtroCampana" onchange="updateSegment()"></select>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <select id="filtroCampana" onchange="updateSegment()" style="flex:1;"></select>
+              <button class="btn btn-ghost" style="color:var(--crimson);border-color:var(--crimson-bg);" title="¿Creaste esta campaña por error? Elimínala aquí mismo." onclick="eliminarCampana(document.getElementById('filtroCampana').value, event)">🗑 Eliminar esta campaña</button>
             </div>
           </div>
 
           <div class="card">
-            <div class="card-head"><h3>Filtrar para enviar</h3><div class="hint">6 criterios disponibles</div></div>
+            <div class="card-head"><h3>Filtrar para enviar</h3><div class="hint">7 criterios disponibles</div></div>
             <div class="filter-grid">
               <div class="filter-card"><label>Puesto / Cargo</label><div id="msPuesto" class="multisel"></div></div>
+              <div class="filter-card"><label>Cargo homologado</label><div id="msCargoHomologado" class="multisel"></div></div>
               <div class="filter-card"><label>Empresa</label><div id="msEmpresa" class="multisel"></div></div>
               <div class="filter-card"><label>Sector</label><div id="msSector" class="multisel"></div></div>
               <div class="filter-card"><label>Origen</label><div id="msOrigen" class="multisel"></div></div>
@@ -563,7 +566,26 @@
         </div>
 
         <div class="card" style="padding:0;overflow-x:auto;">
-          <div class="card-head" style="padding:18px 20px 0 20px;"><h3 id="contactosTitle">Contactos · Curso de SST</h3><div style="display:flex;align-items:center;gap:14px;"><button class="btn btn-ghost" onclick="exportarContactosCSV()">⬇ Exportar CSV</button><div class="hint">Nivel contacto/persona</div></div></div>
+          <div class="card-head" style="padding:18px 20px 0 20px;"><h3 id="contactosTitle">Contactos · Curso de SST</h3><div style="display:flex;align-items:center;gap:14px;"><button class="btn btn-primary" onclick="toggleAgregarAEsta()" id="btnToggleAgregarAEsta">+ Agregar contacto</button><button class="btn btn-ghost" onclick="exportarContactosExcel()">⬇ Exportar Excel</button><div class="hint">Nivel contacto/persona</div></div></div>
+
+          <div id="agregarAEstaWrap" style="display:none;padding:14px 20px;border-bottom:1px solid var(--border);">
+            <div class="search" style="max-width:400px;margin-bottom:10px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+              <input type="text" id="buscarParaAgregarAEsta" placeholder="Busca por nombre o empresa en tu Base de Contactos…" oninput="renderResultadosAgregarAEsta()">
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">
+              <div class="field"><label style="font-size:11px;">Origen</label><select id="af_origen" onchange="renderResultadosAgregarAEsta()"><option value="">Todos</option></select></div>
+              <div class="field"><label style="font-size:11px;">Fuente</label><select id="af_fuente" onchange="renderResultadosAgregarAEsta()"><option value="">Todas</option></select></div>
+              <div class="field"><label style="font-size:11px;">Empresa</label><select id="af_empresa" onchange="renderResultadosAgregarAEsta()"><option value="">Todas</option></select></div>
+              <div class="field"><label style="font-size:11px;">Sector</label><select id="af_sector" onchange="renderResultadosAgregarAEsta()"><option value="">Todos</option></select></div>
+              <div class="field"><label style="font-size:11px;">Cargo</label><select id="af_cargo" onchange="renderResultadosAgregarAEsta()"><option value="">Todos</option></select></div>
+              <div class="field"><label style="font-size:11px;">Cargo homologado</label><select id="af_cargoHomologado" onchange="renderResultadosAgregarAEsta()"><option value="">Todos</option></select></div>
+              <div class="field"><label style="font-size:11px;">Cliente</label><select id="af_cliente" onchange="renderResultadosAgregarAEsta()"><option value="">Todos</option><option value="SI">Cliente</option><option value="NO">No cliente</option></select></div>
+              <div class="field" style="justify-content:flex-end;"><label style="font-size:11px;">&nbsp;</label><button class="btn btn-ghost" onclick="limpiarFiltrosAgregarAEsta()">Limpiar filtros</button></div>
+            </div>
+            <div id="resultadosAgregarAEsta"></div>
+            <div style="font-size:11.5px;color:var(--ink-dim);margin-top:8px;">¿No lo encuentras? Créalo primero en <span style="color:var(--navy);font-weight:700;cursor:pointer;" onclick="switchView('publico')">Base de Contactos</span> — de ahí también lo puedes enviar directo a esta campaña.</div>
+          </div>
           <div id="seguimientoBulkBar" style="display:none;padding:10px 20px;background:var(--bg);margin:12px 20px 0 20px;border-radius:8px;align-items:center;justify-content:space-between;">
             <span style="font-size:12.5px;color:var(--navy);font-weight:700;"><span id="seguimientoSelCount">0</span> seleccionado(s)</span>
             <div style="display:flex;gap:8px;">
@@ -576,7 +598,7 @@
             <span style="font-size:11.5px;color:var(--ink-dim);font-weight:700;cursor:pointer;" onclick="seleccionarTodoSeguimiento(false)">Ninguno</span>
           </div>
           <table>
-            <thead><tr><th></th><th></th><th>Contacto</th><th>Empresa</th><th>Estado</th><th>Rondas</th><th>Canales disponibles</th><th>Recordatorio</th><th>Cupos</th><th>Recurrente</th><th>Observaciones</th></tr></thead>
+            <thead><tr><th></th><th></th><th>Contacto</th><th>Empresa</th><th>Estado</th><th>Rondas</th><th>Canales disponibles</th><th>Último contacto</th><th>Recordatorio</th><th>Cupos</th><th>Recurrente</th><th>Observaciones</th></tr></thead>
             <tbody id="contactosBody"></tbody>
           </table>
         </div>
@@ -584,6 +606,7 @@
 
       <!-- HISTORIAL -->
       <div class="view" id="v-historial">
+        <div style="margin-bottom:8px;"><span style="font-size:12.5px;color:var(--navy);font-weight:700;cursor:pointer;" onclick="switchView('config')">← Volver a Configuración</span></div>
         <div class="eyebrow">Trazabilidad</div>
         <h1 class="section-title">Historial de cambios</h1>
         <p class="section-desc">Registro cronológico: quién, qué campo, valor anterior → valor nuevo. Se guarda de forma persistente.</p>
@@ -649,6 +672,12 @@
         <div class="eyebrow">Configuración</div>
         <h1 class="section-title">Configuración de la plataforma</h1>
         <p class="section-desc">Ajustes generales y opciones de mantenimiento de datos.</p>
+
+        <div class="card">
+          <div class="card-head"><h3>🕐 Historial de cambios</h3><div class="hint">Trazabilidad completa de la plataforma</div></div>
+          <p style="font-size:13px;color:var(--ink-dim);margin-bottom:16px;">Registro cronológico de todo lo que pasó: creación y edición de campañas, cambios de estado, envíos de contactos, eliminaciones — de todas las campañas, no solo una.</p>
+          <button class="btn btn-primary" onclick="switchView('historial')">Ver historial completo →</button>
+        </div>
 
         <div class="card" style="border:1.5px solid var(--crimson);background:var(--crimson-bg);">
           <div class="card-head"><h3 style="color:var(--crimson);">⚠️ Zona de peligro</h3><div class="hint">Estas acciones no se pueden deshacer</div></div>
@@ -1028,9 +1057,13 @@
   }
 
   function descartarCampana(){
+    editingCampanaId = null;
     limpiarFormCampana();
+    document.getElementById('btnCrearCampana').textContent = 'Crear campaña y continuar →';
     showToast('Formulario descartado.');
   }
+
+  let editingCampanaId = null;
 
   function crearCampana(){
     const tipo = document.getElementById('tipoOferta').value;
@@ -1045,9 +1078,40 @@
       return;
     }
     const fmtFecha = (raw) => { if (!raw) return '—'; const [y,m,d] = raw.split('-'); const meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']; return `${parseInt(d)} ${meses[parseInt(m)-1]} ${y}`; };
+
+    if (editingCampanaId){
+      const camp = campaigns.find(c => c.id === editingCampanaId);
+      if (!camp){ showToast('No se encontró la campaña a editar.'); editingCampanaId = null; return; }
+      if (camp.activa === false){ showToast('Esta campaña está inactiva — actívala primero para editarla.'); return; }
+      camp.escuelaKey = tipo;
+      camp.tipo = tipoLabel(tipo);
+      camp.tipoCampana = document.getElementById('tipoCampana').value || '—';
+      camp.tema = document.getElementById('tema').value || '';
+      camp.title = titulo;
+      camp.cupos = Number(document.getElementById('camp_cupos').value) || 0;
+      camp.precio = Number(document.getElementById('camp_precio').value) || 0;
+      camp.moneda = document.getElementById('camp_moneda').value;
+      camp.fechaInicio = fmtFecha(fechaInicioRaw);
+      camp.fechaFin = fmtFecha(document.getElementById('camp_fechaFin').value);
+      camp.analistas = [...analistasSeleccionados];
+      camp.docentes = [...docentesSeleccionados];
+      camp.duracion = document.getElementById('camp_duracion').value || '';
+      if (archivoAdjuntoNombre) camp.archivoNombre = archivoAdjuntoNombre;
+      addHistoryEntry(camp.id, camp.title, 'Campaña editada', '—', `por ${analistasSeleccionados.join(', ')}`);
+      persist();
+      editingCampanaId = null;
+      limpiarFormCampana();
+      document.getElementById('btnCrearCampana').textContent = 'Crear campaña y continuar →';
+      selectedCampaign = camp.id;
+      switchView('seguimiento');
+      renderAll();
+      showToast(`Campaña "${camp.title}" actualizada.`);
+      return;
+    }
+
     const id = 'camp_' + Date.now();
     const nuevaCampana = {
-      id, tipo: tipoLabel(tipo), tipoCampana: document.getElementById('tipoCampana').value || '—', title: titulo,
+      id, escuelaKey: tipo, tipo: tipoLabel(tipo), tipoCampana: document.getElementById('tipoCampana').value || '—', tema: document.getElementById('tema').value || '', title: titulo,
       cupos: Number(document.getElementById('camp_cupos').value) || 0,
       precio: Number(document.getElementById('camp_precio').value) || 0,
       moneda: document.getElementById('camp_moneda').value,
@@ -1055,7 +1119,10 @@
       fechaFin: fmtFecha(document.getElementById('camp_fechaFin').value),
       analistas: [...analistasSeleccionados],
       docentes: [...docentesSeleccionados],
+      duracion: document.getElementById('camp_duracion').value || '',
       archivoNombre: archivoAdjuntoNombre,
+      activa: true,
+      creadaEn: Date.now(),
       contactos: []
     };
     campaigns.push(nuevaCampana);
@@ -1070,6 +1137,51 @@
     renderAll();
     updateSegment();
     showToast(`Campaña "${nuevaCampana.title}" creada. Ahora filtra y envía tu público objetivo.`);
+  }
+
+  function editarCampana(id, event){
+    if (event) event.stopPropagation();
+    const camp = campaigns.find(c => c.id === id);
+    if (!camp) return;
+    if (camp.activa === false){ showToast('Esta campaña está inactiva. Actívala primero (▶) para poder editarla.'); return; }
+    editingCampanaId = id;
+    switchView('campana');
+    document.getElementById('tipoOferta').value = camp.escuelaKey || '';
+    updateTemaOptions();
+    document.getElementById('tipoCampana').value = camp.tipoCampana && camp.tipoCampana !== '—' ? camp.tipoCampana : '';
+    setTimeout(() => { document.getElementById('tema').value = camp.tema || ''; }, 0);
+    tituloEditadoManualmente = true;
+    document.getElementById('titlePreview').value = camp.title;
+    analistasSeleccionados = [...(camp.analistas || [])];
+    renderAnalistasChips();
+    docentesSeleccionados = [...(camp.docentes || [])];
+    renderDocentesChips();
+    document.getElementById('camp_precio').value = camp.precio || '';
+    document.getElementById('camp_moneda').value = camp.moneda || 'PEN';
+    document.getElementById('camp_cupos').value = camp.cupos || '';
+    document.getElementById('camp_duracion').value = camp.duracion || '';
+    document.getElementById('btnCrearCampana').textContent = 'Guardar cambios';
+    showToast(`Editando "${camp.title}".`);
+  }
+
+  function toggleActivaCampana(id, event){
+    if (event) event.stopPropagation();
+    const camp = campaigns.find(c => c.id === id);
+    if (!camp) return;
+    const activarla = camp.activa === false;
+    const accion = activarla ? 'activar' : 'inactivar';
+    showConfirm(`¿Seguro que quieres ${accion} la campaña "${camp.title}"?${!activarla ? ' Mientras esté inactiva no se podrá editar su información ni su seguimiento.' : ' Al activarla, todo vuelve a quedar editable.'}`, () => {
+      camp.activa = activarla;
+      addHistoryEntry(camp.id, camp.title, 'Estado de la campaña', activarla ? 'Inactiva' : 'Activa', activarla ? 'Activa' : 'Inactiva');
+      persist();
+      renderAll();
+      showToast(`Campaña "${camp.title}" ${activarla ? 'activada' : 'inactivada'}.`);
+    }, activarla ? 'Activar' : 'Inactivar');
+  }
+
+  function campanaActiva(id){
+    const camp = campaigns.find(c => c.id === id);
+    return !camp || camp.activa !== false;
   }
 
   function toggleEnvioCampana(){
@@ -1139,7 +1251,7 @@
     { origen:'EDUCACION', fuente:'Base consolidada', semana:4, fecha:'24/06/2026', origenDeBase:'Cliente VyT', nombre:'Gabriela Núñez Farfán', cargo:'Gerente General', cargoHomologado:'Gerente General', telefono:'977889900', telefono2:'', correo:'gabriela.nunez@cerroverde.com', correo2:'', empresa:'Cerro Verde', cliente:'SI', sector:'Minería' },
   ];
 
-  let filtrosMulti = { puesto: [], empresa: [], sector: [], origen: [], fuente: [], cliente: [] };
+  let filtrosMulti = { puesto: [], cargoHomologado: [], empresa: [], sector: [], origen: [], fuente: [], cliente: [] };
 
   function uniqueVals(field){ return [...new Set(contactBase.map(c => c[field]).filter(Boolean))].sort(); }
 
@@ -1187,6 +1299,7 @@
 
   function renderAllMultiSelects(){
     renderMultiSel('msPuesto', 'puesto', uniqueVals('cargo'));
+    renderMultiSel('msCargoHomologado', 'cargoHomologado', uniqueVals('cargoHomologado'));
     renderMultiSel('msEmpresa', 'empresa', uniqueVals('empresa'));
     renderMultiSel('msSector', 'sector', uniqueVals('sector'));
     renderMultiSel('msOrigen', 'origen', origenOptions);
@@ -1311,7 +1424,7 @@
       const enviarDirecto = document.getElementById('nc_enviarDirecto').checked;
       const campId = document.getElementById('filtroCampana').value;
       const camp = campaigns.find(x => x.id === campId);
-      if (enviarDirecto && camp){
+      if (enviarDirecto && camp && camp.activa !== false){
         const canal = document.getElementById('nc_canalEnvio').value;
         camp.contactos.push({
           nombre: datos.nombre, cargo: datos.cargo, cargoHomologado: datos.cargoHomologado, empresa: datos.empresa,
@@ -1407,6 +1520,7 @@
     const f = filtrosMulti;
     return contactBase.filter(c =>
       (f.puesto.length === 0 || f.puesto.includes(c.cargo)) &&
+      (f.cargoHomologado.length === 0 || f.cargoHomologado.includes(c.cargoHomologado)) &&
       (f.empresa.length === 0 || f.empresa.includes(c.empresa)) &&
       (f.sector.length === 0 || f.sector.includes(c.sector)) &&
       (f.origen.length === 0 || f.origen.includes(c.origen)) &&
@@ -1491,6 +1605,7 @@
     const campId = document.getElementById('filtroCampana').value;
     const camp = campaigns.find(c => c.id === campId);
     if (!camp){ showToast('Primero crea una campaña en "Nueva campaña".'); return; }
+    if (camp.activa === false){ showToast('Esta campaña está inactiva — actívala primero para poder enviarle contactos.'); return; }
     const fechaRaw = document.getElementById('fechaEnvio').value;
     const [y,m,d] = fechaRaw.split('-');
     const fecha = `${d}/${m}/${y}`;
@@ -1499,7 +1614,7 @@
       const canal = canalesDisponibles(c)[0];
       canalesUsados.add(canal);
       camp.contactos.push({
-        nombre:c.nombre, cargo:c.cargo, cargoHomologado:c.cargoHomologado, empresa:c.empresa, cliente: c.cliente==='SI'?'Sí':'No',
+        nombre:c.nombre, cargo:c.cargo, cargoHomologado:c.cargoHomologado, empresa:c.empresa, cliente: c.cliente==='SI'?'Sí':'No', sector:c.sector || '—',
         origen:c.origen, fuente:c.fuente, semana:c.semana, fecha:c.fecha, origenDeBase:c.origenDeBase || '—', telefono:c.telefono, telefono2:c.telefono2 || '—',
         correo:c.correo, correo2:c.correo2 || '—', respuestaAnterior:'—', respuesta1:'—', respuesta2:'—', respuestaFinal:'—',
         cupos:0, estado:'enviado', matriculado:'NO', obs:'Recién enviado, sin respuesta todavía',
@@ -1620,35 +1735,60 @@
     renderAll();
   }
 
+  function irASeguimientoFiltrado(estado, soloUrgentes){
+    const activas = campaigns.filter(c => c.activa !== false);
+    let destino = null;
+    if (soloUrgentes){
+      destino = activas.find(c => c.contactos.some(x => recordatorioEsUrgente(x)));
+    } else if (estado && estado !== 'todos'){
+      destino = activas.find(c => c.contactos.some(x => x.estado === estado));
+    }
+    if (!destino) destino = activas.find(c => c.id === selectedCampaign) || activas[0];
+    if (!destino){ showToast('No hay campañas activas todavía.'); return; }
+    selectedCampaign = destino.id;
+    selectedStatus = soloUrgentes ? 'evaluacion' : (estado || 'todos');
+    expandedIdx = null;
+    seguimientoSeleccionados = new Set();
+    switchView('seguimiento');
+    renderAll();
+  }
+
   function renderKpis(){
-    const camp = campaigns.find(c => c.id === selectedCampaign);
-    if (!camp){
-      document.getElementById('kpiRow').innerHTML = `<div class="kpi-card" style="grid-column:span 4;"><div class="kpi-label">Sin campañas todavía</div><div class="kpi-value" style="font-size:16px;">Crea tu primera campaña para ver estadísticas aquí</div></div>`;
+    const activas = campaigns.filter(c => c.activa !== false);
+    if (activas.length === 0){
+      document.getElementById('kpiRow').innerHTML = `<div class="kpi-card" style="grid-column:span 4;"><div class="kpi-label">Sin campañas activas todavía</div><div class="kpi-value" style="font-size:16px;">Crea tu primera campaña para ver estadísticas aquí</div></div>`;
       return;
     }
-    const totalContactos = camp.contactos.length;
-    const enEval = camp.contactos.filter(c => c.estado === 'evaluacion').length;
-    const cuposTomados = camp.contactos.filter(c => c.estado === 'matriculado').length;
-    const respondieron = camp.contactos.filter(c => c.estado !== 'enviado').length;
+    let totalContactos = 0, enEval = 0, matriculados = 0, respondieron = 0, recordatoriosUrgentes = 0;
+    activas.forEach(camp => {
+      totalContactos += camp.contactos.length;
+      camp.contactos.forEach(c => {
+        if (c.estado === 'evaluacion') enEval++;
+        if (c.estado === 'matriculado') matriculados++;
+        if (c.estado !== 'enviado') respondieron++;
+        if (recordatorioEsUrgente(c)) recordatoriosUrgentes++;
+      });
+    });
     const tasa = totalContactos ? Math.round((respondieron/totalContactos)*100) : 0;
     document.getElementById('kpiRow').innerHTML = `
-      <div class="kpi-card"><div class="kpi-label">Contactos en campaña</div><div class="kpi-value">${totalContactos}</div><div class="kpi-delta flat">${camp.title}</div></div>
-      <div class="kpi-card"><div class="kpi-label">En evaluación</div><div class="kpi-value">${enEval}</div><div class="kpi-delta up">Recordatorio activo c/5 días</div></div>
-      <div class="kpi-card"><div class="kpi-label">Cupos vendidos</div><div class="kpi-value">${cuposTomados} / ${camp.cupos}</div><div class="kpi-delta flat">${camp.cupos ? Math.round((cuposTomados/camp.cupos)*100) : 0}% de la meta</div></div>
-      <div class="kpi-card"><div class="kpi-label">Tasa de respuesta</div><div class="kpi-value">${tasa}%</div><div class="kpi-delta up">${respondieron} de ${totalContactos} respondieron</div></div>
+      <div class="kpi-card" style="cursor:pointer;" onclick="switchView('seguimiento'); renderAll();" title="Ver todas las campañas"><div class="kpi-label">Campañas activas</div><div class="kpi-value">${activas.length}</div><div class="kpi-delta flat">${campaigns.length - activas.length} inactiva(s)</div></div>
+      <div class="kpi-card" style="cursor:pointer;" onclick="irASeguimientoFiltrado('todos')" title="Ver contactos"><div class="kpi-label">Contactos totales</div><div class="kpi-value">${totalContactos}</div><div class="kpi-delta flat">${enEval} en evaluación</div></div>
+      <div class="kpi-card" style="cursor:pointer;" onclick="irASeguimientoFiltrado('matriculado')" title="Ver matriculados"><div class="kpi-label">Matriculados</div><div class="kpi-value">${matriculados}</div><div class="kpi-delta up">${tasa}% tasa de respuesta</div></div>
+      <div class="kpi-card" style="cursor:pointer;" onclick="irASeguimientoFiltrado(null, true)" title="Ver recordatorios urgentes"><div class="kpi-label">Recordatorios urgentes</div><div class="kpi-value" style="color:${recordatoriosUrgentes>0?'var(--crimson)':'var(--navy)'};">${recordatoriosUrgentes}</div><div class="kpi-delta flat">${recordatoriosUrgentes>0 ? 'vencen hoy/mañana' : 'todo al día'}</div></div>
     `;
   }
 
   function renderPipeline(){
-    const camp = campaigns.find(c => c.id === selectedCampaign);
-    if (!camp){
+    const activas = campaigns.filter(c => c.activa !== false);
+    if (activas.length === 0){
       document.getElementById('pipeline').innerHTML = `<p style="color:var(--ink-dim);font-size:13px;">Crea una campaña para ver su flujo de estados aquí.</p>`;
       return;
     }
     const stages = ['enviado','evaluacion','sinrespuesta','rechazado','aceptado','matriculado','no_matriculado'];
-    const counts = {}; stages.forEach(s => counts[s] = camp.contactos.filter(c => c.estado === s).length);
+    const counts = {}; stages.forEach(s => counts[s] = 0);
+    activas.forEach(camp => camp.contactos.forEach(c => { if (counts[c.estado] !== undefined) counts[c.estado]++; }));
     document.getElementById('pipeline').innerHTML = stages.map((s,i) => `
-      <div class="pl-stage pl-${s}"><div class="n">${counts[s]}</div><div class="lbl">${badgeLabel[s]}</div>${s==='evaluacion' ? '<div class="pl-note">Recordatorio c/5 días</div>' : ''}</div>
+      <div class="pl-stage pl-${s}" style="cursor:pointer;" onclick="irASeguimientoFiltrado('${s}')" title="Ver contactos en estado ${badgeLabel[s]}"><div class="n">${counts[s]}</div><div class="lbl">${badgeLabel[s]}</div>${s==='evaluacion' ? '<div class="pl-note">Recordatorio c/5 días</div>' : ''}</div>
       ${i < stages.length-1 ? '<div class="pl-arrow">→</div>' : ''}
     `).join('');
   }
@@ -1659,23 +1799,54 @@
     return `${simbolo} ${Number(c.precio).toLocaleString('es-PE')}`;
   }
 
-  function renderResumenTabla(){
-    document.getElementById('campCountHint').textContent = campaigns.length + ' campañas registradas';
-    document.getElementById('resumenCampBody').innerHTML = campaigns.map(c => {
+  function renderUltimasCampanas(){
+    const el = document.getElementById('ultimasCampanas');
+    if (!el) return;
+    const ultimas = [...campaigns].sort((a,b) => (b.creadaEn || 0) - (a.creadaEn || 0)).slice(0,3);
+    if (ultimas.length === 0){
+      el.innerHTML = `<p style="color:var(--ink-dim);font-size:13px;grid-column:span 3;">Sin campañas todavía.</p>`;
+      return;
+    }
+    el.innerHTML = ultimas.map(c => {
       const cuposTomados = c.contactos.filter(x => x.estado === 'matriculado').length;
-      return `<tr><td class="company">${c.title}</td><td>${c.tipo}</td><td>${fmtPrecio(c) || '—'}</td><td>${c.fechaInicio} → ${c.fechaFin}</td><td>${cuposTomados} / ${c.cupos}</td><td>${c.contactos.length}</td></tr>`;
+      const inactiva = c.activa === false;
+      return `<div class="camp-card" style="cursor:pointer;${inactiva ? 'opacity:0.6;' : ''}" onclick="selectedCampaign='${c.id}';selectedStatus='todos';switchView('seguimiento');renderAll();">
+        <div class="camp-tipo">${tipoCorto(c.tipo)}${inactiva ? ' · INACTIVA' : ''}</div>
+        <div class="camp-title">${c.title}</div>
+        <div class="camp-date">📅 ${c.fechaInicio} → ${c.fechaFin}</div>
+        <div class="camp-bar-track"><div class="camp-bar-fill" style="width:${c.cupos ? Math.min(100,(cuposTomados/c.cupos)*100) : 0}%"></div></div>
+        <div class="camp-meta"><span>Cupos <b>${cuposTomados}/${c.cupos}</b></span><span>${c.contactos.length} contactos</span></div>
+      </div>`;
     }).join('');
+  }
+
+  function renderResumenTabla(){
+    const activas = campaigns.filter(c => c.activa !== false);
+    const inactivasCount = campaigns.length - activas.length;
+    document.getElementById('campCountHint').textContent = activas.length + ' activa' + (activas.length===1?'':'s') + (inactivasCount > 0 ? ` · + ${inactivasCount} inactiva(s)` : '');
+    document.getElementById('resumenCampBody').innerHTML = activas.length === 0
+      ? `<tr><td colspan="6" style="text-align:center;color:var(--ink-dim);padding:24px;">Sin campañas activas.</td></tr>`
+      : activas.map(c => {
+        const cuposTomados = c.contactos.filter(x => x.estado === 'matriculado').length;
+        return `<tr><td class="company">${c.title}</td><td>${c.tipo}</td><td>${fmtPrecio(c) || '—'}</td><td>${c.fechaInicio} → ${c.fechaFin}</td><td>${cuposTomados} / ${c.cupos}</td><td>${c.contactos.length}</td></tr>`;
+      }).join('');
   }
 
   function renderCampGrid(){
     document.getElementById('campGrid').innerHTML = campaigns.map(c => {
       const cuposTomados = c.contactos.filter(x => x.estado === 'matriculado').length;
       const precioTxt = fmtPrecio(c);
+      const inactiva = c.activa === false;
       return `
-      <div class="camp-card ${c.id === selectedCampaign ? 'selected' : ''}" data-camp="${c.id}" style="position:relative;">
-        <button class="icon-btn" title="Eliminar campaña" onclick="eliminarCampana('${c.id}', event)" style="position:absolute;top:10px;right:10px;">🗑</button>
+      <div class="camp-card ${c.id === selectedCampaign ? 'selected' : ''}" data-camp="${c.id}" style="position:relative;${inactiva ? 'opacity:0.6;filter:grayscale(0.6);' : ''}">
+        <div style="position:absolute;top:10px;right:10px;display:flex;gap:4px;">
+          <button class="icon-btn" title="Editar campaña" onclick="editarCampana('${c.id}', event)">✎</button>
+          <button class="icon-btn" title="${inactiva ? 'Activar campaña' : 'Inactivar campaña'}" onclick="toggleActivaCampana('${c.id}', event)">${inactiva ? '▶' : '⏸'}</button>
+          <button class="icon-btn" title="Eliminar campaña" onclick="eliminarCampana('${c.id}', event)">🗑</button>
+        </div>
+        ${inactiva ? `<div class="badge" style="background:var(--gray-bg);color:var(--gray);margin-bottom:6px;">⏸ INACTIVA</div>` : ''}
         <div class="camp-tipo">${tipoCorto(c.tipo)}${c.tipoCampana && c.tipoCampana !== '—' ? ' · ' + c.tipoCampana : ''}</div>
-        <div class="camp-title" style="padding-right:24px;">${c.title}</div>
+        <div class="camp-title" style="padding-right:70px;">${c.title}</div>
         <div class="camp-date">📅 ${c.fechaInicio} → ${c.fechaFin}</div>
         ${precioTxt ? `<div style="font-size:11px;color:var(--navy);font-weight:700;margin-bottom:4px;">${precioTxt}</div>` : ''}
         ${c.archivoNombre ? `<div style="font-size:10.5px;color:var(--ink-dim);margin-bottom:6px;">📎 ${c.archivoNombre}</div>` : ''}
@@ -1689,39 +1860,55 @@
   }
 
   // ===== Canales disponibles según los datos reales del contacto =====
-  // ===== Recordatorio dinámico para el Analista de Educación (cada 5 días desde el envío inicial) =====
+  // ===== Recordatorio dinámico para el Analista de Educación (cada 5 días desde el ÚLTIMO contacto real) =====
+  function ultimaFechaValida(c){
+    if (!c.rondas || c.rondas.length === 0) return null;
+    for (let n = c.rondas.length - 1; n >= 0; n--){
+      const f = c.rondas[n].fecha;
+      if (f && f.includes('/')) return f;
+    }
+    return null;
+  }
+
+  // Devuelve { estado: 'futuro'|'sinFecha'|'porVencer'|'hoy'|'vencido', diffDias, texto }
+  function recordatorioInfo(c){
+    if (c.estado !== 'evaluacion') return { estado:'na', texto:'—' };
+    const base = ultimaFechaValida(c);
+    if (!base) return { estado:'sinFecha', texto:'⏱ c/5 días desde el último contacto (sin fecha registrada)' };
+    const [d,m,y] = base.split('/');
+    const fechaBase = new Date(Number(y), Number(m)-1, Number(d));
+    const hoy = new Date();
+    const diffDias = Math.floor((hoy - fechaBase) / (1000*60*60*24));
+    if (diffDias < 0) return { estado:'futuro', texto:'⏱ Fecha de contacto programada a futuro' };
+    if (diffDias < 4){
+      const restante = 5 - diffDias;
+      return { estado:'porVencer', diffDias, texto:`🟡 Te toca seguimiento en ${restante} días` };
+    }
+    if (diffDias === 4) return { estado:'porVencer', diffDias, texto:'🔴 Te toca seguimiento mañana' };
+    if (diffDias === 5) return { estado:'hoy', diffDias, texto:'🔴 Toca seguimiento HOY' };
+    const vencidoHace = diffDias - 5;
+    return { estado:'vencido', diffDias, texto:`🔴 Seguimiento vencido hace ${vencidoHace} día${vencidoHace===1?'':'s'}` };
+  }
+
+  function recordatorioTexto(c){
+    return recordatorioInfo(c).texto;
+  }
+
   function recordatorioEsUrgente(c){
-    if (c.estado !== 'evaluacion') return false;
-    const primera = c.rondas && c.rondas[0] ? c.rondas[0].fecha : null;
-    if (!primera || !primera.includes('/')) return false;
-    const [d,m,y] = primera.split('/');
-    const fechaEnvio = new Date(Number(y), Number(m)-1, Number(d));
-    const diffDias = Math.floor((new Date() - fechaEnvio) / (1000*60*60*24));
-    if (diffDias < 0) return false;
-    const restante = (diffDias > 0 && diffDias % 5 === 0) ? 0 : 5 - (diffDias % 5);
-    return restante <= 1;
+    const info = recordatorioInfo(c);
+    return info.estado === 'hoy' || info.estado === 'vencido' || (info.estado === 'porVencer' && info.diffDias === 4);
   }
 
   function calcularRecordatorio(c){
-    if (c.estado !== 'evaluacion') return '—';
-    const primera = c.rondas && c.rondas[0] ? c.rondas[0].fecha : null;
-    if (!primera || !primera.includes('/')){
-      return `<span class="badge" style="background:var(--amber-bg);color:var(--amber);">⏱ c/5 días · Analista Educ. (sin fecha registrada)</span>`;
-    }
-    const [d,m,y] = primera.split('/');
-    const fechaEnvio = new Date(Number(y), Number(m)-1, Number(d));
-    const hoy = new Date();
-    const diffDias = Math.floor((hoy - fechaEnvio) / (1000*60*60*24));
-    if (diffDias < 0){
-      return `<span class="badge" style="background:var(--gray-bg);color:var(--gray);">⏱ Envío programado a futuro</span>`;
-    }
-    const esHoy = diffDias > 0 && diffDias % 5 === 0;
-    const restante = esHoy ? 0 : 5 - (diffDias % 5);
-    const vencido = restante <= 1; // vence hoy o mañana: urgente
-    const colorBg = esHoy || vencido ? 'var(--crimson-bg)' : 'var(--amber-bg)';
-    const colorFg = esHoy || vencido ? 'var(--crimson)' : 'var(--amber)';
-    const texto = esHoy ? '🔴 Recordatorio HOY' : (vencido ? `🔴 Mañana vence (día ${diffDias})` : `🟡 En ${restante} día${restante===1?'':'s'}`);
-    return `<span class="badge" style="background:${colorBg};color:${colorFg};" title="Corre desde el primer envío: ${primera} (hace ${diffDias} día${diffDias===1?'':'s'}) · Analista de Educación">${texto}</span>`;
+    const info = recordatorioInfo(c);
+    if (info.estado === 'na') return '—';
+    if (info.estado === 'sinFecha') return `<span class="badge" style="background:var(--amber-bg);color:var(--amber);">${info.texto}</span>`;
+    if (info.estado === 'futuro') return `<span class="badge" style="background:var(--gray-bg);color:var(--gray);">${info.texto}</span>`;
+    const urgente = info.estado === 'hoy' || info.estado === 'vencido' || info.diffDias === 4;
+    const colorBg = urgente ? 'var(--crimson-bg)' : 'var(--amber-bg)';
+    const colorFg = urgente ? 'var(--crimson)' : 'var(--amber)';
+    const base = ultimaFechaValida(c);
+    return `<span class="badge" style="background:${colorBg};color:${colorFg};" title="Ciclo de seguimiento cada 5 días desde el último contacto: ${base} (hace ${info.diffDias} día${info.diffDias===1?'':'s'}) · Analista de Educación">${info.texto}</span>`;
   }
 
   function canalesDisponibles(c, valorActual){
@@ -1731,6 +1918,15 @@
     if (opts.length === 0) opts = ['Teléfono','Correo'];
     if (valorActual && !opts.includes(valorActual)) opts.push(valorActual);
     return opts;
+  }
+
+  // Texto informativo de canales que tiene el contacto (ya no es un selector editable)
+  function canalesTexto(c){
+    const canales = [];
+    if (c.correo && c.correo !== '—') canales.push('E-mail');
+    if (c.telefono && c.telefono !== '—'){ canales.push('Teléfono'); canales.push('WhatsApp'); }
+    if (canales.length === 0) return '—';
+    return canales.join(' / ');
   }
 
   function fechaToInputValue(fecha){
@@ -1746,8 +1942,8 @@
   }
 
   function rondaDetailTable(c, i){
-    const labels = ['Primer contacto','Segundo contacto','Tercer contacto','Cuarto contacto','Quinto contacto'];
-    return `<table class="rondas-table"><thead><tr><th>Ronda</th><th>Canal</th><th>Fecha</th></tr></thead><tbody>
+    const labels = ['Primer contacto','Segundo contacto','Tercer contacto','Cuarto contacto'];
+    return `<table class="rondas-table"><thead><tr><th>Ronda</th><th>Canal</th><th>Fecha</th><th>Observación</th></tr></thead><tbody>
       ${labels.map((l,n) => {
         const ronda = c.rondas[n];
         const canalActual = ronda ? ronda.canal : '';
@@ -1756,6 +1952,7 @@
           <td>${l}</td>
           <td><select id="ronda_canal_${i}_${n+1}"><option value="">— Sin registrar —</option>${opts.map(o => `<option ${o===canalActual?'selected':''}>${o}</option>`).join('')}</select></td>
           <td><input type="date" id="ronda_fecha_${i}_${n+1}" value="${fechaToInputValue(ronda ? ronda.fecha : '')}"></td>
+          <td><input type="text" id="ronda_obs_${i}_${n+1}" value="${(ronda && ronda.obs ? ronda.obs : '').replace(/"/g,'&quot;')}" placeholder="Observación de esta ronda" style="width:100%;"></td>
         </tr>`;
       }).join('')}
     </tbody></table>
@@ -1763,14 +1960,16 @@
   }
 
   function guardarRondas(i){
+    if (!campanaActiva(selectedCampaign)){ showToast('Esta campaña está inactiva — actívala primero para editar su seguimiento.'); renderAll(); return; }
     const camp = campaigns.find(x => x.id === selectedCampaign);
     const c = camp.contactos[i];
     const nuevas = [];
-    for (let n = 1; n <= 5; n++){
+    for (let n = 1; n <= 4; n++){
       const canalEl = document.getElementById(`ronda_canal_${i}_${n}`);
       const fechaEl = document.getElementById(`ronda_fecha_${i}_${n}`);
+      const obsEl = document.getElementById(`ronda_obs_${i}_${n}`);
       if (canalEl && canalEl.value){
-        nuevas.push({ n, canal: canalEl.value, fecha: fechaEl.value ? inputValueToFecha(fechaEl.value) : '— (no registrada)' });
+        nuevas.push({ n, canal: canalEl.value, fecha: fechaEl.value ? inputValueToFecha(fechaEl.value) : '— (no registrada)', obs: obsEl ? obsEl.value.trim() : '' });
       }
     }
     const huboCambio = JSON.stringify(nuevas) !== JSON.stringify(c.rondas);
@@ -1779,21 +1978,6 @@
     persist();
     renderAll();
     showToast('Rondas de contacto actualizadas.');
-  }
-
-  function cambiarCanalDisponible(i, val){
-    const camp = campaigns.find(x => x.id === selectedCampaign);
-    const c = camp.contactos[i];
-    if (c.rondas.length === 0){
-      c.rondas.push({ n:1, canal: val, fecha: '— (no registrada)' });
-      addHistoryEntry(selectedCampaign, c.nombre, 'Primer contacto registrado', '—', val);
-    } else {
-      const old = c.rondas[c.rondas.length-1].canal;
-      c.rondas[c.rondas.length-1].canal = val;
-      addHistoryEntry(selectedCampaign, c.nombre, 'Canal del último contacto', old, val);
-    }
-    persist();
-    renderAll();
   }
 
   // ===== Selección múltiple en Campañas y Seguimiento =====
@@ -1822,6 +2006,7 @@
   }
 
   function marcarSeleccionadosEstado(nuevoEstado){
+    if (!campanaActiva(selectedCampaign)){ showToast('Esta campaña está inactiva — actívala primero para editar su seguimiento.'); return; }
     const camp = campaigns.find(c => c.id === selectedCampaign);
     const afectados = camp.contactos.filter(c => seguimientoSeleccionados.has(c.nombre + '|' + c.empresa));
     if (afectados.length === 0) return;
@@ -1840,35 +2025,155 @@
     }, 'Marcar');
   }
 
-  function exportarContactosCSV(){
+  function exportarContactosExcel(){
     const camp = campaigns.find(c => c.id === selectedCampaign);
     if (!camp){ showToast('No hay campaña seleccionada.'); return; }
     const filtered = camp.contactos.filter(c => selectedStatus === 'todos' || c.estado === selectedStatus);
     if (filtered.length === 0){ showToast('No hay contactos para exportar con el filtro actual.'); return; }
-    const headers = ['Apellidos y Nombres','Cargo','Empresa','Cliente','Estado','Rondas','Último canal','Cupos','Observaciones'];
-    const escapeCsv = (v) => `"${String(v ?? '').replace(/"/g,'""')}"`;
-    const rows = filtered.map(c => [
-      c.nombre, c.cargo, c.empresa, c.cliente, badgeLabel[c.estado], c.rondas.length,
-      c.rondas.length ? c.rondas[c.rondas.length-1].canal : '—', c.cupos, c.obs
-    ].map(escapeCsv).join(','));
-    const csv = [headers.map(escapeCsv).join(','), ...rows].join('\n');
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `contactos_${camp.title.replace(/[^a-z0-9]/gi,'_')}_${selectedStatus}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    showToast(`Exportados ${filtered.length} contacto(s) a CSV.`);
+    if (typeof XLSX === 'undefined'){ showToast('No se pudo cargar el módulo de Excel. Verifica tu conexión a internet e intenta de nuevo.'); return; }
+
+    const rows = filtered.map(c => {
+      const row = {
+        'Apellidos y Nombres': c.nombre,
+        'Cargo': c.cargo,
+        'Cargo homologado': c.cargoHomologado,
+        'Empresa': c.empresa,
+        'Cliente': c.cliente,
+        'Sector': c.sector || '—',
+        'Origen': c.origen,
+        'Fuente': c.fuente,
+        'Semana': c.semana,
+        'Fecha de ingreso': c.fecha,
+        'Origen de base': c.origenDeBase || '—',
+        'Teléfono': c.telefono,
+        'Teléfono 2': c.telefono2 || '—',
+        'Correo': c.correo,
+        'Correo 2': c.correo2 || '—',
+        'Estado': badgeLabel[c.estado],
+        'Matriculado': c.matriculado,
+        'Cupos': c.cupos,
+        'Canales disponibles': canalesTexto(c),
+        'Último contacto': c.rondas.length ? c.rondas[c.rondas.length-1].fecha : '—',
+        'Recordatorio': recordatorioTexto(c),
+      };
+      for (let n = 1; n <= 4; n++){
+        const r = c.rondas[n-1];
+        row[`Ronda ${n} · Canal`] = r ? r.canal : '—';
+        row[`Ronda ${n} · Fecha`] = r ? r.fecha : '—';
+        row[`Ronda ${n} · Observación`] = r && r.obs ? r.obs : '—';
+      }
+      row['Observaciones (general)'] = c.obs;
+      return row;
+    });
+
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws['!cols'] = Object.keys(rows[0]).map(k => ({ wch: Math.min(Math.max(k.length, 14), 40) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Contactos');
+    XLSX.writeFile(wb, `contactos_${camp.title.replace(/[^a-z0-9]/gi,'_')}_${selectedStatus}.xlsx`);
+    showToast(`Exportados ${filtered.length} contacto(s) a Excel.`);
+  }
+
+  function toggleAgregarAEsta(){
+    if (!campanaActiva(selectedCampaign)){ showToast('Esta campaña está inactiva — actívala primero para agregarle contactos.'); return; }
+    const wrap = document.getElementById('agregarAEstaWrap');
+    const isHidden = wrap.style.display === 'none';
+    wrap.style.display = isHidden ? 'block' : 'none';
+    document.getElementById('btnToggleAgregarAEsta').textContent = isHidden ? 'Cancelar' : '+ Agregar contacto';
+    if (isHidden){
+      document.getElementById('buscarParaAgregarAEsta').value = '';
+      poblarFiltrosAgregarAEsta();
+      document.getElementById('buscarParaAgregarAEsta').focus();
+      renderResultadosAgregarAEsta();
+    }
+  }
+
+  function poblarFiltrosAgregarAEsta(){
+    const distinct = (field) => [...new Set(contactBase.map(c => c[field]).filter(Boolean))].sort();
+    const fill = (id, values, placeholder) => {
+      const sel = document.getElementById(id);
+      if (!sel) return;
+      const prev = sel.value;
+      sel.innerHTML = `<option value="">${placeholder}</option>` + values.map(v => `<option ${v===prev?'selected':''}>${v}</option>`).join('');
+      if (prev) sel.value = prev;
+    };
+    fill('af_origen', distinct('origen'), 'Todos');
+    fill('af_fuente', distinct('fuente'), 'Todas');
+    fill('af_empresa', distinct('empresa'), 'Todas');
+    fill('af_sector', distinct('sector'), 'Todos');
+    fill('af_cargo', distinct('cargo'), 'Todos');
+    fill('af_cargoHomologado', distinct('cargoHomologado'), 'Todos');
+  }
+
+  function limpiarFiltrosAgregarAEsta(){
+    ['af_origen','af_fuente','af_empresa','af_sector','af_cargo','af_cargoHomologado','af_cliente'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('buscarParaAgregarAEsta').value = '';
+    renderResultadosAgregarAEsta();
+  }
+
+  function renderResultadosAgregarAEsta(){
+    const camp = campaigns.find(c => c.id === selectedCampaign);
+    const q = (document.getElementById('buscarParaAgregarAEsta').value || '').toLowerCase().trim();
+    const fOrigen = document.getElementById('af_origen') ? document.getElementById('af_origen').value : '';
+    const fFuente = document.getElementById('af_fuente') ? document.getElementById('af_fuente').value : '';
+    const fEmpresa = document.getElementById('af_empresa') ? document.getElementById('af_empresa').value : '';
+    const fSector = document.getElementById('af_sector') ? document.getElementById('af_sector').value : '';
+    const fCargo = document.getElementById('af_cargo') ? document.getElementById('af_cargo').value : '';
+    const fCargoHomologado = document.getElementById('af_cargoHomologado') ? document.getElementById('af_cargoHomologado').value : '';
+    const fCliente = document.getElementById('af_cliente') ? document.getElementById('af_cliente').value : '';
+    const yaEnCampana = new Set(camp.contactos.map(c => c.nombre + '|' + c.empresa));
+    const hayFiltro = q || fOrigen || fFuente || fEmpresa || fSector || fCargo || fCargoHomologado || fCliente;
+    const resultados = contactBase.filter(c => !yaEnCampana.has(c.nombre + '|' + c.empresa) &&
+      (!q || c.nombre.toLowerCase().includes(q) || c.empresa.toLowerCase().includes(q)) &&
+      (!fOrigen || c.origen === fOrigen) &&
+      (!fFuente || c.fuente === fFuente) &&
+      (!fEmpresa || c.empresa === fEmpresa) &&
+      (!fSector || c.sector === fSector) &&
+      (!fCargo || c.cargo === fCargo) &&
+      (!fCargoHomologado || c.cargoHomologado === fCargoHomologado) &&
+      (!fCliente || c.cliente === fCliente));
+    const el = document.getElementById('resultadosAgregarAEsta');
+    if (!hayFiltro){
+      el.innerHTML = `<div style="font-size:12px;color:var(--ink-dim);">Escribe o usa los filtros para buscar en tu Base de Contactos (${contactBase.length} en total).</div>`;
+      return;
+    }
+    if (resultados.length === 0){
+      el.innerHTML = `<div style="font-size:12px;color:var(--ink-dim);">Sin resultados (o ya están todos en esta campaña).</div>`;
+      return;
+    }
+    el.innerHTML = resultados.slice(0,8).map((c) => {
+      const idx = contactBase.indexOf(c);
+      return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;">
+        <div><span class="person-name">${c.nombre}</span><span class="person-cargo">${c.cargo} · ${c.empresa}</span></div>
+        <button class="btn btn-ghost" onclick="agregarContactoAEstaCampana(${idx})">+ Agregar</button>
+      </div>`;
+    }).join('') + (resultados.length > 8 ? `<div style="font-size:11px;color:var(--ink-dim);margin-top:4px;">+ ${resultados.length-8} más — afina la búsqueda</div>` : '');
+  }
+
+  function agregarContactoAEstaCampana(idx){
+    const camp = campaigns.find(c => c.id === selectedCampaign);
+    const c = contactBase[idx];
+    const hoy = new Date();
+    const fecha = String(hoy.getDate()).padStart(2,'0')+'/'+String(hoy.getMonth()+1).padStart(2,'0')+'/'+hoy.getFullYear();
+    camp.contactos.push({
+      nombre:c.nombre, cargo:c.cargo, cargoHomologado:c.cargoHomologado, empresa:c.empresa, cliente: c.cliente==='SI'?'Sí':'No', sector:c.sector || '—',
+      origen:c.origen, fuente:c.fuente, semana:c.semana, fecha:c.fecha, origenDeBase:c.origenDeBase || '—', telefono:c.telefono, telefono2:c.telefono2 || '—',
+      correo:c.correo, correo2:c.correo2 || '—', respuestaAnterior:'—', respuesta1:'—', respuesta2:'—', respuestaFinal:'—',
+      cupos:0, estado:'enviado', matriculado:'NO', obs:'Recién agregado, sin respuesta todavía',
+      rondas:[{ n:1, canal: canalesDisponibles(c)[0], fecha }]
+    });
+    addHistoryEntry(selectedCampaign, c.nombre, 'Agregado a la campaña', '—', camp.title);
+    persist();
+    renderAll();
+    renderResultadosAgregarAEsta();
+    showToast(`"${c.nombre}" agregado a "${camp.title}".`);
   }
 
   function renderContactos(){
     const camp = campaigns.find(c => c.id === selectedCampaign);
     if (!camp){
       document.getElementById('contactosTitle').textContent = 'Contactos';
-      document.getElementById('contactosBody').innerHTML = `<tr><td colspan="11" style="text-align:center;color:var(--ink-dim);padding:24px;">No hay ninguna campaña creada todavía. Ve a "Nueva campaña" para crear la primera.</td></tr>`;
+      document.getElementById('contactosBody').innerHTML = `<tr><td colspan="12" style="text-align:center;color:var(--ink-dim);padding:24px;">No hay ninguna campaña creada todavía. Ve a "Nueva campaña" para crear la primera.</td></tr>`;
       const bar = document.getElementById('seguimientoBulkBar');
       if (bar) bar.style.display = 'none';
       return;
@@ -1878,13 +2183,12 @@
     const filtered = camp.contactos.map((c,i) => ({c,i})).filter(({c}) => selectedStatus === 'todos' || c.estado === selectedStatus);
     renderBulkBar();
     if (filtered.length === 0){
-      body.innerHTML = `<tr><td colspan="11" style="text-align:center;color:var(--ink-dim);padding:24px;">Sin contactos registrados todavía para esta campaña / filtro.</td></tr>`;
+      body.innerHTML = `<tr><td colspan="12" style="text-align:center;color:var(--ink-dim);padding:24px;">Sin contactos registrados todavía para esta campaña / filtro.</td></tr>`;
       return;
     }
     body.innerHTML = filtered.map(({c,i}) => {
       const key = c.nombre + '|' + c.empresa;
       const ultimoCanal = c.rondas.length ? c.rondas[c.rondas.length-1].canal : '';
-      const opcionesCanal = canalesDisponibles(c, ultimoCanal);
       const otrasCampanas = participacionesPrevias(c.nombre, c.empresa).filter(p => p.campana !== camp.title);
       const rows = [`
       <tr class="row-hover-actions" style="${recordatorioEsUrgente(c) ? 'background:var(--crimson-bg);' : ''}">
@@ -1899,8 +2203,9 @@
         </td>
         <td>${c.empresa}<br><span style="font-size:10.5px;color:var(--ink-dim)">${c.cliente==='Sí'?'Cliente':'No cliente'}</span></td>
         <td><span class="badge badge-${c.estado}">${badgeLabel[c.estado]}</span></td>
-        <td><div class="contact-dots">${[1,2,3,4,5].map(n => `<div class="cdot ${n<=c.rondas.length?'done':(n===c.rondas.length+1?'next':'')}"></div>`).join('')}</div></td>
-        <td><select onchange="cambiarCanalDisponible(${i}, this.value)" style="font-size:11.5px;">${opcionesCanal.map(o => `<option ${o===ultimoCanal?'selected':''}>${o}</option>`).join('')}</select></td>
+        <td><div class="contact-dots">${[1,2,3,4].map(n => `<div class="cdot ${n<=c.rondas.length?'done':(n===c.rondas.length+1?'next':'')}"></div>`).join('')}</div></td>
+        <td style="font-size:12px;">${canalesTexto(c)}</td>
+        <td style="font-size:12px;">${c.rondas.length ? c.rondas[c.rondas.length-1].fecha : '—'}</td>
         <td>${calcularRecordatorio(c)}</td>
         <td>${c.cupos}</td>
         <td>${otrasCampanas.length > 0 ? `<span class="badge badge-origen" style="cursor:pointer;" onclick="verHistorialContacto('${c.nombre.replace(/'/g,"\\'")}','${c.empresa.replace(/'/g,"\\'")}')">🔁 ${otrasCampanas.length}</span>` : '<span style="color:var(--ink-dim);font-size:11px;">—</span>'}</td>
@@ -1911,7 +2216,7 @@
         const disponibles = canalesDisponibles(c);
         const sinProbar = disponibles.filter(d => !usados.has(d));
         const sugerirOtroCanal = (c.estado === 'sinrespuesta' || c.estado === 'enviado') && sinProbar.length > 0 && c.rondas.length > 0;
-        rows.push(`<tr class="detail-row"><td colspan="11">
+        rows.push(`<tr class="detail-row"><td colspan="12">
           <div class="detail-grid">
             <div class="detail-item"><div class="k">Origen</div><div class="v"><span class="badge badge-origen">${c.origen}</span></div></div>
             <div class="detail-item"><div class="k">Fuente</div><div class="v">${c.fuente}</div></div>
@@ -1959,6 +2264,7 @@
   function toggleExpand(i){ expandedIdx = expandedIdx === i ? null : i; renderContactos(); }
 
   function quitarContactoDeCampana(i){
+    if (!campanaActiva(selectedCampaign)){ showToast('Esta campaña está inactiva — actívala primero para editar su seguimiento.'); return; }
     const camp = campaigns.find(c => c.id === selectedCampaign);
     const c = camp.contactos[i];
     showConfirm(`¿Quitar a "${c.nombre}" del seguimiento de "${camp.title}"? Esto no lo elimina de la Base de Contactos, solo de esta campaña.`, () => {
@@ -1972,6 +2278,7 @@
   }
 
   function actualizarSeguimiento(i){
+    if (!campanaActiva(selectedCampaign)){ showToast('Esta campaña está inactiva — actívala primero para editar su seguimiento.'); renderAll(); return; }
     const camp = campaigns.find(c => c.id === selectedCampaign);
     const c = camp.contactos[i];
     const nuevoEstado = document.getElementById('upd_estado_' + i).value;
@@ -2199,9 +2506,9 @@
   }
 
   function renderAll(){
-    renderKpis(); renderPipeline(); renderResumenTabla();
+    renderKpis(); renderPipeline(); renderResumenTabla(); renderUltimasCampanas();
     renderCampGrid(); renderContactos(); renderHistorial();
-    populateFilterOptions(); poblarFiltrosBase(); renderBaseTable();
+    populateFilterOptions(); poblarFiltrosBase(); renderBaseTable(); poblarFiltrosAgregarAEsta();
     refreshOptionLists(); renderAnalistasChips(); renderDocentesChips();
     renderAllMultiSelects();
     renderBI();
