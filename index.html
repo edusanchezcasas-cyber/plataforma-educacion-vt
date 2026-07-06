@@ -1870,23 +1870,26 @@
     return null;
   }
 
-  // Devuelve { estado: 'futuro'|'sinFecha'|'porVencer'|'hoy'|'vencido', diffDias, texto }
+  // El recordatorio de seguimiento aplica mientras el contacto siga "en juego" (no en un estado final)
+  const estadosConRecordatorio = ['enviado', 'evaluacion', 'sinrespuesta'];
+
+  // Devuelve { estado: 'na'|'futuro'|'sinFecha'|'porVencer'|'vencido', diffDias, texto }
   function recordatorioInfo(c){
-    if (c.estado !== 'evaluacion') return { estado:'na', texto:'—' };
+    if (!estadosConRecordatorio.includes(c.estado)) return { estado:'na', texto:'—' };
     const base = ultimaFechaValida(c);
     if (!base) return { estado:'sinFecha', texto:'⏱ c/5 días desde el último contacto (sin fecha registrada)' };
     const [d,m,y] = base.split('/');
     const fechaBase = new Date(Number(y), Number(m)-1, Number(d));
     const hoy = new Date();
     const diffDias = Math.floor((hoy - fechaBase) / (1000*60*60*24));
-    if (diffDias < 0) return { estado:'futuro', texto:'⏱ Fecha de contacto programada a futuro' };
+    if (diffDias < 0) return { estado:'futuro', texto:`🔵 Envío programado para el ${base} (aún no llega la fecha)` };
     if (diffDias < 4){
       const restante = 5 - diffDias;
       return { estado:'porVencer', diffDias, texto:`🟡 Te toca seguimiento en ${restante} días` };
     }
     if (diffDias === 4) return { estado:'porVencer', diffDias, texto:'🔴 Te toca seguimiento mañana' };
-    if (diffDias === 5) return { estado:'hoy', diffDias, texto:'🔴 Toca seguimiento HOY' };
-    const vencidoHace = diffDias - 5;
+    // Al cumplirse el 5º día ya se considera vencido (no hay un día "HOY" intermedio)
+    const vencidoHace = diffDias - 4;
     return { estado:'vencido', diffDias, texto:`🔴 Seguimiento vencido hace ${vencidoHace} día${vencidoHace===1?'':'s'}` };
   }
 
@@ -1896,15 +1899,15 @@
 
   function recordatorioEsUrgente(c){
     const info = recordatorioInfo(c);
-    return info.estado === 'hoy' || info.estado === 'vencido' || (info.estado === 'porVencer' && info.diffDias === 4);
+    return info.estado === 'vencido' || (info.estado === 'porVencer' && info.diffDias === 4);
   }
 
   function calcularRecordatorio(c){
     const info = recordatorioInfo(c);
     if (info.estado === 'na') return '—';
     if (info.estado === 'sinFecha') return `<span class="badge" style="background:var(--amber-bg);color:var(--amber);">${info.texto}</span>`;
-    if (info.estado === 'futuro') return `<span class="badge" style="background:var(--gray-bg);color:var(--gray);">${info.texto}</span>`;
-    const urgente = info.estado === 'hoy' || info.estado === 'vencido' || info.diffDias === 4;
+    if (info.estado === 'futuro') return `<span class="badge" style="background:var(--blue-bg);color:var(--blue);">${info.texto}</span>`;
+    const urgente = info.estado === 'vencido' || info.diffDias === 4;
     const colorBg = urgente ? 'var(--crimson-bg)' : 'var(--amber-bg)';
     const colorFg = urgente ? 'var(--crimson)' : 'var(--amber)';
     const base = ultimaFechaValida(c);
